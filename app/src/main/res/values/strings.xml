@@ -93,13 +93,13 @@
     <string name="discussions_nav_contacts">Contacts</string>
     <string name="discussions_nav_settings">Réglages</string>
     <string name="discussions_sample_fatou_name">Fatou Sow</string>
-    <string name="discussions_sample_fatou_message">Super, à tout l'heure !</string>
+    <string name="discussions_sample_fatou_message">Super, à tout l\'heure !</string>
     <string name="discussions_sample_fatou_time">09:12</string>
     <string name="discussions_sample_ibrahim_name">Ibrahim Diop</string>
     <string name="discussions_sample_ibrahim_message">Tu as vu la photo ?</string>
     <string name="discussions_sample_ibrahim_time">Hier</string>
     <string name="discussions_sample_family_name">Famille Diallo</string>
-    <string name="discussions_sample_family_message">Aïcha : D'accord</string>
+    <string name="discussions_sample_family_message">Aïcha : D\'accord</string>
     <string name="discussions_sample_family_time">Hier</string>
     <string name="discussions_sample_maman_name">Maman</string>
     <string name="discussions_sample_maman_message">Message vocal • 0:24</string>
