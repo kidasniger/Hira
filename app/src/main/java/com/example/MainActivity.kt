@@ -29,6 +29,8 @@ import com.example.ui.auth.LoginScreen
 import com.example.ui.auth.RegisterScreen
 import com.example.ui.contacts.ContactsPermissionScreen
 import com.example.ui.contacts.ContactsScreen
+import com.example.ui.chat.AttachmentMenuScreen
+import com.example.ui.chat.AttachmentAction
 import com.example.ui.chat.PrivateChatScreen
 import com.example.ui.discussions.DiscussionsScreen
 import com.example.ui.profile.ProfileSetupScreen
@@ -65,6 +67,7 @@ class MainActivity : ComponentActivity() {
                 var profileDisplayName by rememberSaveable { mutableStateOf("") }
                 var profilePhotoUrl by rememberSaveable { mutableStateOf<String?>(null) }
                 var selectedChatContactName by rememberSaveable { mutableStateOf<String?>(null) }
+                var selectedChatContactStatus by rememberSaveable { mutableStateOf<String?>(null) }
 
                 // Écoute de l'événement de navigation après authentification réussie
                 // Consommé une seule fois grâce au Channel
@@ -171,21 +174,46 @@ class MainActivity : ComponentActivity() {
                                         // Le parcours de téléchargement HIRA sera ajouté sur un écran dédié ultérieurement.
                                     },
                                     onContactClick = {
-                                        // L'ouverture sera activée après vérification réelle du compte HIRA du contact.
+                                        // Les contacts réels seront ouverts après la vérification du compte HIRA.
+                                    },
+                                    onDemoContactClick = {
+                                        selectedChatContactName = getString(R.string.contacts_demo_name)
+                                        selectedChatContactStatus = getString(R.string.contacts_demo_status)
+                                        currentRoute = HiraRoutes.CHAT_PRIVE
                                     }
                                 )
                             }
                             HiraRoutes.CHAT_PRIVE -> {
                                 PrivateChatScreen(
                                     contactName = selectedChatContactName,
+                                    contactStatus = selectedChatContactStatus,
                                     onBack = {
                                         currentRoute = HiraRoutes.CONTACTS
                                     },
                                     onAttachmentClick = {
-                                        // L'écran 12 sera branché ici ultérieurement.
+                                        currentRoute = HiraRoutes.PIECES_JOINTES
                                     },
                                     onSendMessage = {
                                         // L'envoi réel sera branché au service de messagerie.
+                                    }
+                                )
+                            }
+                            HiraRoutes.PIECES_JOINTES -> {
+                                AttachmentMenuScreen(
+                                    contactName = selectedChatContactName,
+                                    contactStatus = selectedChatContactStatus,
+                                    onBack = {
+                                        currentRoute = HiraRoutes.CHAT_PRIVE
+                                    },
+                                    onAttachmentAction = { action ->
+                                        when (action) {
+                                            AttachmentAction.PHOTO,
+                                            AttachmentAction.VIDEO,
+                                            AttachmentAction.DOCUMENT,
+                                            AttachmentAction.VOICE -> {
+                                                // Les sélecteurs et l'enregistrement réel seront ajoutés dans les écrans fichiers/vocaux.
+                                            }
+                                        }
                                     }
                                 )
                             }
