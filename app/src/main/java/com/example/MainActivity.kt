@@ -3,7 +3,6 @@ package com.example
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -30,6 +29,7 @@ import com.example.ui.auth.LoginScreen
 import com.example.ui.auth.PlaceholderSessionScreen
 import com.example.ui.auth.RegisterScreen
 import com.example.ui.contacts.ContactsPermissionScreen
+import com.example.ui.contacts.ContactsScreen
 import com.example.ui.discussions.DiscussionsScreen
 import com.example.ui.profile.ProfileSetupScreen
 import com.example.ui.onboarding.OnboardingScreen1
@@ -89,7 +89,6 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // Navigation fluide et légère adaptée à tous les téléphones
                     AnimatedContent(
                         targetState = currentRoute,
                         transitionSpec = {
@@ -102,9 +101,6 @@ class MainActivity : ComponentActivity() {
                             HiraRoutes.SPLASH -> {
                                 SplashScreen(
                                     onSplashFinished = {
-                                        // Priorité 1 : Session existante -> DISCUSSIONS direct
-                                        // Priorité 2 : Onboarding complété -> CONNEXION
-                                        // Priorité 3 : Nouvel utilisateur -> ACCUEIL_1
                                         currentRoute = when {
                                             authRepository.isSignedIn() -> HiraRoutes.DISCUSSIONS
                                             onboardingPreferences.isOnboardingCompleted() -> HiraRoutes.CONNEXION
@@ -115,28 +111,16 @@ class MainActivity : ComponentActivity() {
                             }
                             HiraRoutes.ACCUEIL_1 -> {
                                 OnboardingScreen1(
-                                    onNextClick = {
-                                        currentRoute = HiraRoutes.ACCUEIL_2
-                                    },
-                                    onSkipClick = {
-                                        currentRoute = HiraRoutes.ACCUEIL_3
-                                    },
-                                    onBack = {
-                                        finish()
-                                    }
+                                    onNextClick = { currentRoute = HiraRoutes.ACCUEIL_2 },
+                                    onSkipClick = { currentRoute = HiraRoutes.ACCUEIL_3 },
+                                    onBack = { finish() }
                                 )
                             }
                             HiraRoutes.ACCUEIL_2 -> {
                                 OnboardingScreen2(
-                                    onNextClick = {
-                                        currentRoute = HiraRoutes.ACCUEIL_3
-                                    },
-                                    onSkipClick = {
-                                        currentRoute = HiraRoutes.ACCUEIL_3
-                                    },
-                                    onBackClick = {
-                                        currentRoute = HiraRoutes.ACCUEIL_1
-                                    }
+                                    onNextClick = { currentRoute = HiraRoutes.ACCUEIL_3 },
+                                    onSkipClick = { currentRoute = HiraRoutes.ACCUEIL_3 },
+                                    onBackClick = { currentRoute = HiraRoutes.ACCUEIL_1 }
                                 )
                             }
                             HiraRoutes.ACCUEIL_3 -> {
@@ -146,9 +130,7 @@ class MainActivity : ComponentActivity() {
                                         onboardingPreferences.setOnboardingCompleted(true)
                                         currentRoute = HiraRoutes.CONNEXION
                                     },
-                                    onBackClick = {
-                                        currentRoute = HiraRoutes.ACCUEIL_2
-                                    }
+                                    onBackClick = { currentRoute = HiraRoutes.ACCUEIL_2 }
                                 )
                             }
                             HiraRoutes.CONNEXION -> {
@@ -159,9 +141,7 @@ class MainActivity : ComponentActivity() {
                                         authViewModel.clearErrors()
                                         currentRoute = HiraRoutes.CREATION_COMPTE
                                     },
-                                    onBack = {
-                                        finish()
-                                    }
+                                    onBack = { finish() }
                                 )
                             }
                             HiraRoutes.CREATION_COMPTE -> {
@@ -175,14 +155,30 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             HiraRoutes.DISCUSSIONS -> {
-                                DiscussionsScreen()
+                                DiscussionsScreen(
+                                    onContactsClick = {
+                                        currentRoute = HiraRoutes.CONTACTS
+                                    }
+                                )
+                            }
+                            HiraRoutes.CONTACTS -> {
+                                ContactsScreen(
+                                    onDiscussionsClick = {
+                                        currentRoute = HiraRoutes.DISCUSSIONS
+                                    },
+                                    onInviteClick = {
+                                        // Le parcours de téléchargement HIRA sera ajouté sur un écran dédié ultérieurement.
+                                    },
+                                    onContactClick = {
+                                        // L'ouverture de la conversation privée sera branchée à l'écran 11.
+                                    }
+                                )
                             }
                             HiraRoutes.CONFIG_PROFIL -> {
                                 ProfileSetupScreen(
                                     initialDisplayName = profileDisplayName,
                                     initialPhotoUrl = profilePhotoUrl,
                                     onFinish = { _, _ ->
-                                        // Écran 7 terminé -> écran 8 : permission des contacts
                                         currentRoute = HiraRoutes.PERMISSION_CONTACTS
                                     }
                                 )
@@ -200,7 +196,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    // Interface modale de mise à jour globale superposée
                     UpdateBottomSheet(
                         state = updateState,
                         onDownloadClick = { updateInfo ->
@@ -228,14 +223,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        // Vérification lors du retour au premier plan (avec throttling 1h)
         updateViewModel.checkForUpdates(force = false)
     }
 
     private fun handleIntent(intent: Intent?) {
         val data = intent?.data
         if (data?.scheme == "hira" && data.host == "update") {
-            // Déclenchement forcé de la mise à jour via deep link
             updateViewModel.checkForUpdates(force = true)
         }
     }
