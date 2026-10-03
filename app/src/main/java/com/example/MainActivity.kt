@@ -30,6 +30,7 @@ import com.example.ui.auth.LoginScreen
 import com.example.ui.auth.PlaceholderSessionScreen
 import com.example.ui.auth.RegisterScreen
 import com.example.ui.contacts.ContactsPermissionScreen
+import com.example.ui.discussions.DiscussionsScreen
 import com.example.ui.profile.ProfileSetupScreen
 import com.example.ui.onboarding.OnboardingScreen1
 import com.example.ui.onboarding.OnboardingScreen2
@@ -174,14 +175,7 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             HiraRoutes.DISCUSSIONS -> {
-                                PlaceholderSessionScreen(
-                                    title = "Discussions",
-                                    userEmail = authRepository.currentEmail(),
-                                    onSignOut = {
-                                        authRepository.signOut()
-                                        currentRoute = HiraRoutes.CONNEXION
-                                    }
-                                )
+                                DiscussionsScreen()
                             }
                             HiraRoutes.CONFIG_PROFIL -> {
                                 ProfileSetupScreen(
