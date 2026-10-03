@@ -2,6 +2,7 @@ package com.example.data.auth
 
 import android.util.Log
 import com.google.android.gms.tasks.Task
+import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthException
@@ -21,7 +22,14 @@ class AuthRepository(
     private val firebaseAuthSupplier: () -> FirebaseAuth = { FirebaseAuth.getInstance() }
 ) {
 
-    private fun getAuth(): FirebaseAuth = firebaseAuthSupplier()
+    private fun getAuth(): FirebaseAuth {
+        return try {
+            firebaseAuthSupplier()
+        } catch (e: Exception) {
+            Log.e(TAG, "Échec lors de l'accès à FirebaseAuth: ${e.message}", e)
+            throw e
+        }
+    }
 
     /**
      * Inscription par e-mail et mot de passe.
@@ -31,6 +39,7 @@ class AuthRepository(
             val auth = getAuth()
             val result = auth.createUserWithEmailAndPassword(email.trim(), password).awaitTask()
             val user = result.user ?: throw IllegalStateException("Utilisateur introuvable après création.")
+            Log.i(TAG, "Utilisateur créé avec succès (UID: ${user.uid})")
             Result.success(
                 AuthUser(
                     uid = user.uid,
@@ -41,6 +50,8 @@ class AuthRepository(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            val errorCode = (e as? FirebaseAuthException)?.errorCode
+            Log.e(TAG, "signUp failed - Class: ${e.javaClass.name}, Message: ${e.message}, ErrorCode: $errorCode", e)
             Result.failure(e)
         }
     }
@@ -53,6 +64,7 @@ class AuthRepository(
             val auth = getAuth()
             val result = auth.signInWithEmailAndPassword(email.trim(), password).awaitTask()
             val user = result.user ?: throw IllegalStateException("Utilisateur introuvable après connexion.")
+            Log.i(TAG, "Utilisateur connecté avec succès par e-mail (UID: ${user.uid})")
             Result.success(
                 AuthUser(
                     uid = user.uid,
@@ -63,6 +75,8 @@ class AuthRepository(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            val errorCode = (e as? FirebaseAuthException)?.errorCode
+            Log.e(TAG, "signIn failed - Class: ${e.javaClass.name}, Message: ${e.message}, ErrorCode: $errorCode", e)
             Result.failure(e)
         }
     }
@@ -77,6 +91,7 @@ class AuthRepository(
             val result = auth.signInWithCredential(credential).awaitTask()
             val user = result.user ?: throw IllegalStateException("Utilisateur introuvable après connexion Google.")
             val isNew = result.additionalUserInfo?.isNewUser ?: false
+            Log.i(TAG, "Connexion Google réussie dans Firebase Auth (UID: ${user.uid}, isNewUser: $isNew)")
             Result.success(
                 AuthUser(
                     uid = user.uid,
@@ -89,7 +104,7 @@ class AuthRepository(
         } catch (e: Exception) {
             val errorCode = (e as? FirebaseAuthException)?.errorCode
             Log.e(
-                "AuthRepository",
+                TAG,
                 "signInWithGoogle failed - Class: ${e.javaClass.name}, Message: ${e.message}, ErrorCode: $errorCode",
                 e
             )
@@ -104,10 +119,13 @@ class AuthRepository(
         return try {
             val auth = getAuth()
             auth.sendPasswordResetEmail(email.trim()).awaitTask()
+            Log.i(TAG, "E-mail de réinitialisation envoyé avec succès")
             Result.success(Unit)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            val errorCode = (e as? FirebaseAuthException)?.errorCode
+            Log.e(TAG, "sendPasswordResetEmail failed - Class: ${e.javaClass.name}, Message: ${e.message}, ErrorCode: $errorCode", e)
             Result.failure(e)
         }
     }
@@ -118,7 +136,9 @@ class AuthRepository(
     fun signOut() {
         try {
             getAuth().signOut()
-        } catch (_: Exception) {
+            Log.i(TAG, "Déconnexion Firebase Auth effectuée")
+        } catch (e: Exception) {
+            Log.w(TAG, "Erreur lors de la déconnexion Firebase: ${e.message}")
         }
     }
 
@@ -158,5 +178,9 @@ class AuthRepository(
                 continuation.resumeWithException(exception)
             }
         }
+    }
+
+    companion object {
+        private const val TAG = "AuthRepository"
     }
 }

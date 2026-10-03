@@ -3,8 +3,11 @@ package com.example
 import android.app.Application
 import android.util.Log
 import com.google.firebase.FirebaseApp
-import com.google.firebase.FirebaseOptions
 
+/**
+ * Application principale pour HIRA.
+ * Initialise Firebase à partir du fichier google-services.json traité par le plugin Google Services.
+ */
 class HiraApplication : Application() {
 
     override fun onCreate() {
@@ -17,34 +20,15 @@ class HiraApplication : Application() {
             if (FirebaseApp.getApps(this).isEmpty()) {
                 val app = FirebaseApp.initializeApp(this)
                 if (app != null) {
-                    Log.i(TAG, "FirebaseApp initialisé avec succès depuis les ressources")
+                    Log.i(TAG, "FirebaseApp initialisé avec succès depuis google-services.json (Projet: ${app.options.projectId})")
                 } else {
-                    fallbackInitialize()
+                    Log.w(TAG, "FirebaseApp.initializeApp a retourné null. Vérifiez que google-services.json est présent dans app/")
                 }
             } else {
-                Log.i(TAG, "FirebaseApp déjà initialisé")
+                Log.i(TAG, "FirebaseApp déjà initialisé automatiquement via FirebaseInitProvider")
             }
         } catch (e: Exception) {
-            Log.w(TAG, "Initialisation standard de FirebaseApp échouée: ${e.message}, bascule vers fallback explicite")
-            fallbackInitialize()
-        }
-    }
-
-    private fun fallbackInitialize() {
-        try {
-            if (FirebaseApp.getApps(this).isEmpty()) {
-                val options = FirebaseOptions.Builder()
-                    .setApplicationId("1:129923565999:android:f65c07cce87001aae4475a")
-                    .setApiKey("AIzaSyAO8qEzAjd0-tLXcMLqrAJ3819ZXMboi2o")
-                    .setProjectId("hira-app-chat")
-                    .setStorageBucket("hira-app-chat.firebasestorage.app")
-                    .setGcmSenderId("129923565999")
-                    .build()
-                FirebaseApp.initializeApp(this, options)
-                Log.i(TAG, "FirebaseApp initialisé avec succès avec les options explicites de google-services.json")
-            }
-        } catch (ex: Exception) {
-            Log.e(TAG, "Erreur fatale lors de l'initialisation de repli de FirebaseApp", ex)
+            Log.e(TAG, "Erreur lors de l'initialisation de FirebaseApp depuis google-services.json: ${e.message}", e)
         }
     }
 
