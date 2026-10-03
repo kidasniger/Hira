@@ -1,10 +1,13 @@
 package com.example
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.OpenableColumns
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -19,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.data.auth.AuthRepository
 import com.example.data.local.OnboardingPreferences
@@ -30,6 +34,7 @@ import com.example.ui.auth.RegisterScreen
 import com.example.ui.contacts.ContactsPermissionScreen
 import com.example.ui.contacts.ContactsScreen
 import com.example.ui.chat.AttachmentMenuScreen
+import com.example.ui.chat.LargeFileDownloadScreen
 import com.example.ui.chat.AttachmentAction
 import com.example.ui.chat.PrivateChatScreen
 import com.example.ui.discussions.DiscussionsScreen
@@ -68,6 +73,30 @@ class MainActivity : ComponentActivity() {
                 var profilePhotoUrl by rememberSaveable { mutableStateOf<String?>(null) }
                 var selectedChatContactName by rememberSaveable { mutableStateOf<String?>(null) }
                 var selectedChatContactStatus by rememberSaveable { mutableStateOf<String?>(null) }
+                var selectedLargeFileUri by rememberSaveable { mutableStateOf<String?>(null) }
+                var selectedLargeFileName by rememberSaveable { mutableStateOf<String?>(null) }
+                var selectedLargeFileSizeBytes by rememberSaveable { mutableStateOf<Long?>(null) }
+                var selectedLargeFileMimeType by rememberSaveable { mutableStateOf<String?>(null) }
+
+                val attachmentPicker = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.OpenDocument()
+                ) { uri ->
+                    selectedLargeFileUri = uri?.toString()
+                }
+
+                LaunchedEffect(selectedLargeFileUri) {
+                    val uriString = selectedLargeFileUri ?: return@LaunchedEffect
+                    val uri = Uri.parse(uriString)
+                    val metadata = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                        readSelectedFileMetadata(contentResolver, uri)
+                    }
+                    if (metadata != null) {
+                        selectedLargeFileName = metadata.name
+                        selectedLargeFileSizeBytes = metadata.sizeBytes
+                        selectedLargeFileMimeType = metadata.mimeType
+                        currentRoute = HiraRoutes.TELECHARGEMENT_FICHIER
+                    }
+                }
 
                 // Écoute de l'événement de navigation après authentification réussie
                 // Consommé une seule fois grâce au Channel
@@ -207,13 +236,37 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onAttachmentAction = { action ->
                                         when (action) {
+                                            AttachmentAction.VIDEO -> {
+                                                attachmentPicker.launch(arrayOf("video/*"))
+                                            }
+                                            AttachmentAction.DOCUMENT -> {
+                                                attachmentPicker.launch(arrayOf("*/*"))
+                                            }
                                             AttachmentAction.PHOTO,
-                                            AttachmentAction.VIDEO,
-                                            AttachmentAction.DOCUMENT,
                                             AttachmentAction.VOICE -> {
-                                                // Les sélecteurs et l'enregistrement réel seront ajoutés dans les écrans fichiers/vocaux.
+                                                // Les sélecteurs correspondants seront ajoutés dans leurs écrans dédiés.
                                             }
                                         }
+                                    }
+                                )
+                            }
+                            HiraRoutes.TELECHARGEMENT_FICHIER -> {
+                                LargeFileDownloadScreen(
+                                    contactName = selectedChatContactName,
+                                    contactStatus = selectedChatContactStatus,
+                                    fileName = selectedLargeFileName.orEmpty().ifBlank {
+                                        getString(com.hira.kidas.R.string.large_file_name_unknown)
+                                    },
+                                    fileSizeBytes = selectedLargeFileSizeBytes,
+                                    mimeType = selectedLargeFileMimeType,
+                                    onBack = {
+                                        currentRoute = HiraRoutes.PIECES_JOINTES
+                                    },
+                                    onDownloadClick = {
+                                        // Le téléchargement réel sera relié au moteur de transfert de fichiers.
+                                    },
+                                    onCancel = {
+                                        currentRoute = HiraRoutes.PIECES_JOINTES
                                     }
                                 )
                             }
@@ -275,4 +328,38 @@ class MainActivity : ComponentActivity() {
             updateViewModel.checkForUpdates(force = true)
         }
     }
+}
+
+
+private data class SelectedFileMetadata(
+    val name: String,
+    val sizeBytes: Long?,
+    val mimeType: String?
+)
+
+private fun readSelectedFileMetadata(
+    resolver: android.content.ContentResolver,
+    uri: Uri
+): SelectedFileMetadata? {
+    val nameAndSize = resolver.query(
+        uri,
+        arrayOf(OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE),
+        null,
+        null,
+        null
+    )?.use { cursor ->
+        if (!cursor.moveToFirst()) return@use null
+
+        val nameIndex = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+        val sizeIndex = cursor.getColumnIndex(OpenableColumns.SIZE)
+        val name = if (nameIndex >= 0) cursor.getString(nameIndex)?.trim().orEmpty() else ""
+        val size = if (sizeIndex >= 0 && !cursor.isNull(sizeIndex)) cursor.getLong(sizeIndex) else null
+        if (name.isBlank()) null else name to size
+    } ?: return null
+
+    return SelectedFileMetadata(
+        name = nameAndSize.first,
+        sizeBytes = nameAndSize.second,
+        mimeType = resolver.getType(uri)
+    )
 }

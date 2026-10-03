@@ -123,4 +123,10 @@
     <string name="contacts_message_action">Message</string>
     <string name="contacts_invite_action">Inviter</string>
 
+    <string name="large_file_name_unknown">Fichier</string>
+    <string name="large_file_size_unknown">Taille inconnue</string>
+    <string name="large_file_download">Télécharger</string>
+    <string name="large_file_downloading">Téléchargement… %1$d%%</string>
+    <string name="large_file_cancel">Annuler</string>
+    <string name="large_file_downloaded">Téléchargement terminé</string>
 </resources>
