@@ -1,7 +1,7 @@
 package com.example.ui.auth
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -54,6 +54,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -197,8 +198,12 @@ fun LoginScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    // Icône "G" Google minimaliste et vectorielle
-                    GoogleLogoIcon(modifier = Modifier.size(20.dp))
+                    // Logo Google officiel
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_google_logo),
+                        contentDescription = stringResource(id = R.string.auth_google_continue),
+                        modifier = Modifier.size(22.dp)
+                    )
                     Spacer(modifier = Modifier.width(12.dp))
                     Text(
                         text = stringResource(id = R.string.auth_google_continue),
@@ -444,60 +449,5 @@ fun LoginScreen(
                 }
             }
         }
-    }
-}
-
-/**
- * Icône logo Google minimaliste tracée en Canvas vectoriel (4 couleurs standard).
- */
-@Composable
-fun GoogleLogoIcon(modifier: Modifier = Modifier) {
-    Canvas(modifier = modifier) {
-        val size = size.minDimension
-        val stroke = size * 0.18f
-        val radius = (size - stroke) / 2f
-        val center = Offset(size / 2f, size / 2f)
-
-        // Arc bleu (haut droite)
-        drawArc(
-            color = Color(0xFF4285F4),
-            startAngle = -45f,
-            sweepAngle = 90f,
-            useCenter = false,
-            style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke)
-        )
-        // Arc vert (bas)
-        drawArc(
-            color = Color(0xFF34A853),
-            startAngle = 45f,
-            sweepAngle = 90f,
-            useCenter = false,
-            style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke)
-        )
-        // Arc jaune (gauche bas)
-        drawArc(
-            color = Color(0xFFFBBC05),
-            startAngle = 135f,
-            sweepAngle = 90f,
-            useCenter = false,
-            style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke)
-        )
-        // Arc rouge (haut gauche)
-        drawArc(
-            color = Color(0xFFEA4335),
-            startAngle = 225f,
-            sweepAngle = 90f,
-            useCenter = false,
-            style = androidx.compose.ui.graphics.drawscope.Stroke(width = stroke)
-        )
-
-        // Barre centrale bleue du 'G'
-        val barWidth = radius * 0.9f
-        drawLine(
-            color = Color(0xFF4285F4),
-            start = Offset(center.x, center.y),
-            end = Offset(center.x + barWidth, center.y),
-            strokeWidth = stroke
-        )
     }
 }
