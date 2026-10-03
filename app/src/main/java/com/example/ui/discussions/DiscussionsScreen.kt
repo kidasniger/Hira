@@ -1,6 +1,7 @@
 package com.example.ui.discussions
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,10 +12,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
@@ -51,6 +52,7 @@ import com.hira.kidas.R
 @Composable
 fun DiscussionsScreen(
     onSearchClick: () -> Unit = {},
+    onContactsClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -126,10 +128,26 @@ fun DiscussionsScreen(
                     .testTag("discussions_bottom_navigation"),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                BottomNavigationLabel(stringResource(R.string.discussions_nav_discussions), true)
-                BottomNavigationLabel(stringResource(R.string.discussions_nav_groups), false)
-                BottomNavigationLabel(stringResource(R.string.discussions_nav_contacts), false)
-                BottomNavigationLabel(stringResource(R.string.discussions_nav_settings), false)
+                BottomNavigationLabel(
+                    text = stringResource(R.string.discussions_nav_discussions),
+                    active = true,
+                    onClick = {}
+                )
+                BottomNavigationLabel(
+                    text = stringResource(R.string.discussions_nav_groups),
+                    active = false,
+                    onClick = {}
+                )
+                BottomNavigationLabel(
+                    text = stringResource(R.string.discussions_nav_contacts),
+                    active = false,
+                    onClick = onContactsClick
+                )
+                BottomNavigationLabel(
+                    text = stringResource(R.string.discussions_nav_settings),
+                    active = false,
+                    onClick = {}
+                )
             }
         }
     }
@@ -139,15 +157,26 @@ fun DiscussionsScreen(
 private fun RowScope.BottomNavigationLabel(
     text: String,
     active: Boolean,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Column(
         modifier = modifier
             .weight(1f)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .background(
+                    color = if (active) HiraRoyalBlue else Color.Transparent
+                )
+        )
+        Spacer(modifier = Modifier.height(3.dp))
         Text(
             text = text,
             fontSize = 11.sp,
