@@ -77,4 +77,11 @@
     <string name="profile_setup_display_name_required">Veuillez renseigner un nom affiché.</string>
     <string name="profile_setup_avatar_description">Photo de profil</string>
     <string name="profile_setup_edit_photo_description">Modifier la photo de profil</string>
+
+    <!-- Écran 8 — Permission des contacts -->
+    <string name="contacts_permission_title">Trouvez vos proches</string>
+    <string name="contacts_permission_subtitle">Retrouvez vos contacts qui utilisent déjà Hira</string>
+    <string name="contacts_permission_allow">Autoriser</string>
+    <string name="contacts_permission_later">Plus tard</string>
+    <string name="contacts_permission_icon_description">Contacts</string>
 </resources>
