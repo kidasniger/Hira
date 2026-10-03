@@ -29,6 +29,7 @@ import com.example.ui.auth.AuthViewModel
 import com.example.ui.auth.LoginScreen
 import com.example.ui.auth.PlaceholderSessionScreen
 import com.example.ui.auth.RegisterScreen
+import com.example.ui.contacts.ContactsPermissionScreen
 import com.example.ui.profile.ProfileSetupScreen
 import com.example.ui.onboarding.OnboardingScreen1
 import com.example.ui.onboarding.OnboardingScreen2
@@ -179,6 +180,17 @@ class MainActivity : ComponentActivity() {
                             HiraRoutes.CONFIG_PROFIL -> {
                                 ProfileSetupScreen(
                                     onFinish = { _, _ ->
+                                        // Écran 7 terminé -> écran 8 : permission des contacts
+                                        currentRoute = HiraRoutes.PERMISSION_CONTACTS
+                                    }
+                                )
+                            }
+                            HiraRoutes.PERMISSION_CONTACTS -> {
+                                ContactsPermissionScreen(
+                                    onPermissionGranted = {
+                                        currentRoute = HiraRoutes.DISCUSSIONS
+                                    },
+                                    onSkip = {
                                         currentRoute = HiraRoutes.DISCUSSIONS
                                     }
                                 )
