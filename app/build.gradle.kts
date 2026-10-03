@@ -9,7 +9,7 @@ plugins {
 }
 
 android {
-  namespace = "com.example"
+  namespace = "com.hira.kidas"
   compileSdk { version = release(36) { minorApiLevel = 1 } }
 
   defaultConfig {

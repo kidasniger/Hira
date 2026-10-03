@@ -41,6 +41,14 @@ class OnboardingPreferencesTest {
     }
 
     @Test
+    fun `apres etape 2 l onboarding reste non termine`() {
+        prefs.setOnboardingStep(2)
+        assertEquals(2, prefs.getOnboardingStep())
+        // Règle stricte : l'onboarding reste inachevé après Accueil 2/3
+        assertFalse(prefs.isOnboardingCompleted())
+    }
+
+    @Test
     fun `memorisation de la fin d onboarding uniquement lorsque demande`() {
         prefs.setOnboardingCompleted(true)
         assertTrue(prefs.isOnboardingCompleted())

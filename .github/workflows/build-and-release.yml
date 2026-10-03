@@ -50,10 +50,10 @@ jobs:
 
       - name: Reconstruct Production Keystore
         run: |
-          printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > hira-release.jks
-          if [ ! -s hira-release.jks ]; then
+          printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > "${{ github.workspace }}/hira-release.jks"
+          if [ ! -s "${{ github.workspace }}/hira-release.jks" ]; then
             echo "::error::Le keystore décodé est vide ou invalide."
-            rm -f hira-release.jks
+            rm -f "${{ github.workspace }}/hira-release.jks"
             exit 1
           fi
           echo "Keystore reconstruit temporairement pour le build de release."
@@ -131,7 +131,7 @@ jobs:
 
       - name: Run Lint
         env:
-          KEYSTORE_PATH: hira-release.jks
+          KEYSTORE_PATH: ${{ github.workspace }}/hira-release.jks
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -139,15 +139,33 @@ jobs:
 
       - name: Run Unit Tests
         env:
-          KEYSTORE_PATH: hira-release.jks
+          KEYSTORE_PATH: ${{ github.workspace }}/hira-release.jks
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: ./gradlew test --stacktrace
 
+      - name: Verify Keystore Availability and Integrity
+        run: |
+          if [ ! -f "${{ github.workspace }}/hira-release.jks" ]; then
+            echo "::error::Keystore HIRA introuvable."
+            exit 1
+          fi
+
+          if ! keytool -list \
+            -keystore "${{ github.workspace }}/hira-release.jks" \
+            -alias "${{ secrets.KEY_ALIAS }}" \
+            -storepass "${{ secrets.STORE_PASSWORD }}" \
+            >/dev/null 2>&1; then
+            echo "::error::Échec de la validation de l'alias ou du mot de passe du keystore HIRA."
+            exit 1
+          fi
+
+          echo "Keystore HIRA validé avec succès."
+
       - name: Build Signed Release APK
         env:
-          KEYSTORE_PATH: hira-release.jks
+          KEYSTORE_PATH: ${{ github.workspace }}/hira-release.jks
           STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
@@ -238,5 +256,5 @@ jobs:
       - name: Cleanup Keystore
         if: always()
         run: |
-          rm -f hira-release.jks
+          rm -f "${{ github.workspace }}/hira-release.jks"
           echo "Keystore temporaire supprimé du runner."

@@ -22,6 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.navigation.HiraRoutes
 import com.example.ui.onboarding.OnboardingScreen1
+import com.example.ui.onboarding.OnboardingScreen2
 import com.example.ui.splash.SplashScreen
 import com.example.ui.theme.HiraTheme
 import com.example.ui.update.UpdateBottomSheet
@@ -84,9 +85,24 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             HiraRoutes.ACCUEIL_2 -> {
+                                OnboardingScreen2(
+                                    onNextClick = {
+                                        // Cible de navigation vers Accueil 3/3
+                                        currentRoute = HiraRoutes.ACCUEIL_3
+                                    },
+                                    onSkipClick = {
+                                        currentRoute = HiraRoutes.ACCUEIL_3
+                                    },
+                                    onBackClick = {
+                                        // Retour vers Accueil 1/3
+                                        currentRoute = HiraRoutes.ACCUEIL_1
+                                    }
+                                )
+                            }
+                            HiraRoutes.ACCUEIL_3 -> {
                                 // Route cible déclarée mais interface non implémentée selon les consignes strictes
                                 BackHandler {
-                                    currentRoute = HiraRoutes.ACCUEIL_1
+                                    currentRoute = HiraRoutes.ACCUEIL_2
                                 }
                             }
                         }

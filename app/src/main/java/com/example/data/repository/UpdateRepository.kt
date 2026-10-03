@@ -1,7 +1,7 @@
 package com.example.data.repository
 
 import android.content.Context
-import com.example.BuildConfig
+import com.hira.kidas.BuildConfig
 import com.example.data.model.AppUpdateInfo
 import com.example.data.model.UpdateCheckResult
 import com.example.data.model.UpdateDownloadState

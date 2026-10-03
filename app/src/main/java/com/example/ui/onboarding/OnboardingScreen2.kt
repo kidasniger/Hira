@@ -1,6 +1,7 @@
 package com.example.ui.onboarding
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,8 +20,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -28,6 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -49,28 +56,29 @@ import com.example.ui.theme.HiraTheme
 import com.example.ui.theme.HiraWhite
 
 /**
- * ÉCRAN 2 — ACCUEIL 1/3 : "Une messagerie légère"
+ * ÉCRAN 3 — ACCUEIL 2/3 : "Vos données restent chez vous"
  *
  * Éléments conformes à l'identité visuelle HIRA et à la maquette :
  * - Fond blanc épuré (#FFFFFF)
- * - Bouton "Passer" discret en haut à droite
- * - Illustration centrale valorisant la légèreté avec le logo officiel HIRA
- * - Titre fort "Une messagerie légère" (26-28sp, ExtraBold)
- * - Sous-titre explicatif court et lisible (15sp, gris neutre #555555)
- * - Indicateur de pagination 1/3 (pilule bleu royal active + 2 points inactifs)
+ * - Navigation : bouton retour vers Accueil 1/3 et bouton "Passer" en haut à droite
+ * - Illustration centrale valorisant la souveraineté et la protection des données
+ *   (disque bleu clair #E6EBFF avec l'oiseau HIRA bleu royal et anneau de protection vectoriel minimal)
+ * - Titre "Vos données restent chez vous" (26sp, ExtraBold)
+ * - Sous-titre court et lisible (15sp, gris neutre #555555)
+ * - Indicateur de pagination 2/3 (point inactif + pilule bleu royal active + point inactif)
  * - Bouton d'action principal "Suivant" en bleu royal plat (#0043FF)
- * - Comportement de retour Android sécurisé (évite le retour en boucle vers le Splash)
+ * - Navigation système retour intégrée vers Accueil 1/3 (BackHandler)
  */
 @Composable
-fun OnboardingScreen1(
+fun OnboardingScreen2(
     onNextClick: () -> Unit,
     onSkipClick: () -> Unit,
-    onBack: () -> Unit,
+    onBackClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Gestion propre du bouton retour système : empêche tout retour involontaire vers le Splash
+    // Gestion du retour système Android : retour direct vers Accueil 1/3
     BackHandler {
-        onBack()
+        onBackClick()
     }
 
     Box(
@@ -78,20 +86,34 @@ fun OnboardingScreen1(
             .fillMaxSize()
             .background(HiraWhite)
             .windowInsetsPadding(WindowInsets.statusBars)
-            .testTag("onboarding_screen_1")
+            .testTag("onboarding_screen_2")
     ) {
-        // En-tête : bouton "Passer" en haut à droite
+        // Barre supérieure : retour à gauche + "Passer" à droite
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.End,
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            IconButton(
+                onClick = onBackClick,
+                modifier = Modifier
+                    .size(48.dp)
+                    .testTag("onboarding_back_button")
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(id = R.string.onboarding_previous),
+                    tint = HiraGrayDark
+                )
+            }
+
             TextButton(
                 onClick = onSkipClick,
                 modifier = Modifier
                     .height(48.dp)
+                    .padding(end = 8.dp)
                     .testTag("onboarding_skip_button")
             ) {
                 Text(
@@ -113,28 +135,77 @@ fun OnboardingScreen1(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Illustration centrale : cercle épuré bleu clair avec l'oiseau HIRA bleu royal
+            // Illustration centrale : disque bleu clair avec logo HIRA et contour de protection souveraine
             Box(
                 modifier = Modifier
                     .size(180.dp)
                     .clip(CircleShape)
                     .background(HiraRoyalBlueLight)
-                    .testTag("onboarding_1_illustration"),
+                    .testTag("onboarding_2_illustration"),
                 contentAlignment = Alignment.Center
             ) {
+                // Anneau de protection minimaliste vectoriel (aucun dégradé, aucun effet lourd)
+                Canvas(modifier = Modifier.size(160.dp)) {
+                    val strokeWidth = 2.dp.toPx()
+                    val radius = (size.minDimension - strokeWidth) / 2f
+                    drawCircle(
+                        color = HiraRoyalBlue.copy(alpha = 0.25f),
+                        radius = radius,
+                        style = Stroke(width = strokeWidth)
+                    )
+
+                    // Petit verrou minimaliste plat en bas à droite
+                    val lockCenter = center.copy(y = center.y + 48.dp.toPx())
+                    val badgeRadius = 14.dp.toPx()
+                    drawCircle(
+                        color = HiraRoyalBlue,
+                        radius = badgeRadius,
+                        center = lockCenter
+                    )
+
+                    // Corps du cadenas (rectangle blanc plat)
+                    val lockBodyWidth = 10.dp.toPx()
+                    val lockBodyHeight = 8.dp.toPx()
+                    val lockBodyLeft = lockCenter.x - lockBodyWidth / 2f
+                    val lockBodyTop = lockCenter.y - lockBodyHeight / 2f + 2.dp.toPx()
+                    drawRect(
+                        color = HiraWhite,
+                        topLeft = androidx.compose.ui.geometry.Offset(lockBodyLeft, lockBodyTop),
+                        size = androidx.compose.ui.geometry.Size(lockBodyWidth, lockBodyHeight)
+                    )
+
+                    // Anse du cadenas (arc blanc plat)
+                    val arcPath = Path().apply {
+                        val arcLeft = lockCenter.x - 3.5f.dp.toPx()
+                        val arcTop = lockBodyTop - 5.dp.toPx()
+                        moveTo(arcLeft, lockBodyTop)
+                        cubicTo(
+                            arcLeft, arcTop,
+                            arcLeft + 7.dp.toPx(), arcTop,
+                            arcLeft + 7.dp.toPx(), lockBodyTop
+                        )
+                    }
+                    drawPath(
+                        path = arcPath,
+                        color = HiraWhite,
+                        style = Stroke(width = 1.6f.dp.toPx())
+                    )
+                }
+
+                // Logo officiel HIRA
                 HiraLogo(
-                    size = 110.dp,
+                    size = 96.dp,
                     tint = HiraRoyalBlue,
                     isAnimated = false,
-                    modifier = Modifier.testTag("onboarding_1_logo")
+                    modifier = Modifier.testTag("onboarding_2_logo")
                 )
             }
 
             Spacer(modifier = Modifier.height(36.dp))
 
-            // Titre de l'écran 1
+            // Titre de l'écran 2
             Text(
-                text = stringResource(id = R.string.onboarding_1_title),
+                text = stringResource(id = R.string.onboarding_2_title),
                 fontSize = 26.sp,
                 fontWeight = FontWeight.ExtraBold,
                 color = Color(0xFF111111),
@@ -143,14 +214,14 @@ fun OnboardingScreen1(
                 fontFamily = FontFamily.SansSerif,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .testTag("onboarding_1_title")
+                    .testTag("onboarding_2_title")
             )
 
             Spacer(modifier = Modifier.height(14.dp))
 
             // Sous-titre descriptif
             Text(
-                text = stringResource(id = R.string.onboarding_1_tagline),
+                text = stringResource(id = R.string.onboarding_2_tagline),
                 fontSize = 15.sp,
                 fontWeight = FontWeight.Normal,
                 color = HiraGrayDark,
@@ -160,11 +231,11 @@ fun OnboardingScreen1(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp)
-                    .testTag("onboarding_1_description")
+                    .testTag("onboarding_2_description")
             )
         }
 
-        // Zone inférieure : indicateur 1/3 et bouton Suivant
+        // Zone inférieure : indicateur 2/3 et bouton Suivant
         Column(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
@@ -173,32 +244,32 @@ fun OnboardingScreen1(
                 .padding(horizontal = 24.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Indicateur de pagination 1/3
+            // Indicateur de pagination 2/3
             Row(
                 modifier = Modifier
                     .padding(bottom = 24.dp)
-                    .semantics { contentDescription = "Écran 1 sur 3" }
+                    .semantics { contentDescription = "Écran 2 sur 3" }
                     .testTag("onboarding_page_indicator"),
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Écran 1 (actif) : pilule bleu royal allongée
+                // Écran 1 (inactif)
+                Box(
+                    modifier = Modifier
+                        .size(8.dp)
+                        .clip(CircleShape)
+                        .background(HiraBorder)
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                // Écran 2 (actif) : pilule bleu royal allongée
                 Box(
                     modifier = Modifier
                         .width(26.dp)
                         .height(8.dp)
                         .clip(RoundedCornerShape(4.dp))
                         .background(HiraRoyalBlue)
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                // Écran 2 (inactif)
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(HiraBorder)
                 )
 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -242,12 +313,12 @@ fun OnboardingScreen1(
 
 @Preview(showBackground = true, widthDp = 360, heightDp = 800)
 @Composable
-fun OnboardingScreen1Preview() {
+fun OnboardingScreen2Preview() {
     HiraTheme {
-        OnboardingScreen1(
+        OnboardingScreen2(
             onNextClick = {},
             onSkipClick = {},
-            onBack = {}
+            onBackClick = {}
         )
     }
 }
