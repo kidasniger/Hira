@@ -28,6 +28,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.hira.kidas.R
 import com.example.ui.theme.HiraRoyalBlue
 import com.example.ui.theme.HiraWhite
 
@@ -53,29 +55,25 @@ fun HiraBottomNavigation(
         verticalAlignment = Alignment.CenterVertically
     ) {
         HiraNavigationItem(
-            destination = HiraNavDestination.DISCUSSIONS,
-            label = "Discussions",
+            label = stringResource(R.string.discussions_nav_discussions),
             icon = Icons.Outlined.ChatBubbleOutline,
             selected = selected == HiraNavDestination.DISCUSSIONS,
             onClick = { onDestinationClick(HiraNavDestination.DISCUSSIONS) }
         )
         HiraNavigationItem(
-            destination = HiraNavDestination.GROUPES,
-            label = "Groupes",
+            label = stringResource(R.string.discussions_nav_groups),
             icon = Icons.Outlined.Group,
             selected = selected == HiraNavDestination.GROUPES,
             onClick = { onDestinationClick(HiraNavDestination.GROUPES) }
         )
         HiraNavigationItem(
-            destination = HiraNavDestination.CONTACTS,
-            label = "Contacts",
+            label = stringResource(R.string.discussions_nav_contacts),
             icon = Icons.Outlined.Contacts,
             selected = selected == HiraNavDestination.CONTACTS,
             onClick = { onDestinationClick(HiraNavDestination.CONTACTS) }
         )
         HiraNavigationItem(
-            destination = HiraNavDestination.REGLAGES,
-            label = "Réglages",
+            label = stringResource(R.string.discussions_nav_settings),
             icon = Icons.Outlined.Settings,
             selected = selected == HiraNavDestination.REGLAGES,
             onClick = { onDestinationClick(HiraNavDestination.REGLAGES) }
@@ -85,7 +83,6 @@ fun HiraBottomNavigation(
 
 @Composable
 private fun RowScope.HiraNavigationItem(
-    destination: HiraNavDestination,
     label: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     selected: Boolean,
