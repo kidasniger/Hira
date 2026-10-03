@@ -27,6 +27,14 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Prevent hardcoded Google API keys
+        run: |
+          if git grep -nE 'AIza[0-9A-Za-z_-]{20,}' -- ':!app/google-services.json' ':!**/build/**' ':!**/.gradle/**'; then
+            echo "::error::Une clé Google API est codée en dur dans le dépôt. Utilisez la configuration Firebase générée et restreinte."
+            exit 1
+          fi
+          echo "Aucune clé Google API codée en dur hors google-services.json."
+
       - name: Validate Google Services configuration
         run: |
           if [ ! -f "app/google-services.json" ]; then
