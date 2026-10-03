@@ -109,4 +109,5 @@
     <string name="discussions_sample_aicha_time">Lun</string>
     <string name="discussions_sample_boutique_name">Boutique Orange</string>
     <string name="discussions_sample_boutique_message">Votre commande est prête</string>
+    <string name="discussions_sample_boutique_time">Dim</string>
 </resources>
