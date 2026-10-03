@@ -49,6 +49,14 @@ class OnboardingPreferencesTest {
     }
 
     @Test
+    fun `apres validation etape 3 l onboarding est definitivement marque termine`() {
+        prefs.setOnboardingStep(3)
+        prefs.setOnboardingCompleted(true)
+        assertEquals(3, prefs.getOnboardingStep())
+        assertTrue(prefs.isOnboardingCompleted())
+    }
+
+    @Test
     fun `memorisation de la fin d onboarding uniquement lorsque demande`() {
         prefs.setOnboardingCompleted(true)
         assertTrue(prefs.isOnboardingCompleted())

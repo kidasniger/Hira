@@ -15,4 +15,10 @@
     <string name="onboarding_2_tagline">Vos messages et fichiers sont stockés directement sur votre appareil. Zéro pistage, zéro profilage publicitaire.</string>
     <string name="onboarding_step_2_of_3">Écran 2 sur 3</string>
     <string name="onboarding_previous">Retour</string>
+
+    <!-- Onboarding 3/3 -->
+    <string name="onboarding_3_title">Pensée pour les petites connexions</string>
+    <string name="onboarding_3_tagline">Envoyez vos messages même en 2G ou réseau instable. La compression intelligente préserve vos données mobiles et votre batterie.</string>
+    <string name="onboarding_start">Commencer</string>
+    <string name="onboarding_step_3_of_3">Écran 3 sur 3</string>
 </resources>

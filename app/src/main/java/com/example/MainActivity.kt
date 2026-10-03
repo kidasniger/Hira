@@ -16,13 +16,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.data.local.OnboardingPreferences
 import com.example.navigation.HiraRoutes
 import com.example.ui.onboarding.OnboardingScreen1
 import com.example.ui.onboarding.OnboardingScreen2
+import com.example.ui.onboarding.OnboardingScreen3
 import com.example.ui.splash.SplashScreen
 import com.example.ui.theme.HiraTheme
 import com.example.ui.update.UpdateBottomSheet
@@ -43,6 +46,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             HiraTheme {
                 val updateState by updateViewModel.updateState.collectAsStateWithLifecycle()
+                val onboardingPreferences = remember { OnboardingPreferences(applicationContext) }
                 var currentRoute by rememberSaveable { mutableStateOf(HiraRoutes.SPLASH) }
 
                 // Vérification automatique au démarrage (avec throttling intégré)
@@ -64,8 +68,12 @@ class MainActivity : ComponentActivity() {
                             HiraRoutes.SPLASH -> {
                                 SplashScreen(
                                     onSplashFinished = {
-                                        // Transition normale vers Accueil 1/3
-                                        currentRoute = HiraRoutes.ACCUEIL_1
+                                        // Si l'utilisateur a déjà complété l'onboarding, diriger directement vers Connexion
+                                        currentRoute = if (onboardingPreferences.isOnboardingCompleted()) {
+                                            HiraRoutes.CONNEXION
+                                        } else {
+                                            HiraRoutes.ACCUEIL_1
+                                        }
                                     }
                                 )
                             }
@@ -76,7 +84,7 @@ class MainActivity : ComponentActivity() {
                                         currentRoute = HiraRoutes.ACCUEIL_2
                                     },
                                     onSkipClick = {
-                                        currentRoute = HiraRoutes.ACCUEIL_2
+                                        currentRoute = HiraRoutes.ACCUEIL_3
                                     },
                                     onBack = {
                                         // Sortie propre sans retour en boucle vers le Splash
@@ -100,9 +108,24 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             HiraRoutes.ACCUEIL_3 -> {
-                                // Route cible déclarée mais interface non implémentée selon les consignes strictes
+                                OnboardingScreen3(
+                                    onFinishClick = {
+                                        // Règle stricte : marquer l'onboarding terminé UNIQUEMENT ici
+                                        onboardingPreferences.setOnboardingStep(3)
+                                        onboardingPreferences.setOnboardingCompleted(true)
+                                        currentRoute = HiraRoutes.CONNEXION
+                                    },
+                                    onBackClick = {
+                                        // Retour vers Accueil 2/3
+                                        currentRoute = HiraRoutes.ACCUEIL_2
+                                    }
+                                )
+                            }
+                            HiraRoutes.CONNEXION -> {
+                                // Destination de navigation vers l'Écran 5 (Connexion)
+                                // Interface non implémentée selon les consignes strictes (étape suivante)
                                 BackHandler {
-                                    currentRoute = HiraRoutes.ACCUEIL_2
+                                    finish()
                                 }
                             }
                         }
