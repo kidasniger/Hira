@@ -31,6 +31,7 @@
     <string name="auth_email_hint">nom@exemple.com</string>
     <string name="auth_password_label">Mot de passe</string>
     <string name="auth_password_hint">••••••••</string>
+    <string name="auth_register_password_hint">Au moins 8 caractères</string>
     <string name="auth_show_password">Afficher le mot de passe</string>
     <string name="auth_hide_password">Masquer le mot de passe</string>
     <string name="auth_forgot_password">Mot de passe oublié ?</string>
