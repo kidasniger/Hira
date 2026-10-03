@@ -102,4 +102,12 @@
     <string name="contacts_loading">Chargement des contacts…</string>
     <string name="contacts_empty">Aucun contact disponible sur cet appareil.</string>
     <string name="contacts_invite_friend">Inviter un ami</string>
+
+
+    <!-- Écran 11 — Conversation privée -->
+    <string name="chat_private_default_contact">Conversation</string>
+    <string name="chat_private_back_description">Retour</string>
+    <string name="chat_private_attachment_description">Pièces jointes</string>
+    <string name="chat_private_message_hint">Message</string>
+    <string name="chat_private_send_description">Envoyer</string>
 </resources>
