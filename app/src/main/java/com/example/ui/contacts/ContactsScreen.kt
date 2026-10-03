@@ -5,12 +5,10 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.provider.ContactsContract
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,6 +51,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.example.ui.components.HiraBottomNavigation
+import com.example.ui.components.HiraNavDestination
 import com.example.ui.theme.HiraBorder
 import com.example.ui.theme.HiraGrayDark
 import com.example.ui.theme.HiraRoyalBlue
@@ -302,35 +302,15 @@ fun ContactsScreen(
                 }
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .background(HiraWhite)
-                    .testTag("contacts_bottom_navigation"),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                BottomNavigationLabel(
-                    text = stringResource(R.string.discussions_nav_discussions),
-                    active = false,
-                    onClick = onDiscussionsClick
-                )
-                BottomNavigationLabel(
-                    text = stringResource(R.string.discussions_nav_groups),
-                    active = false,
-                    onClick = {}
-                )
-                BottomNavigationLabel(
-                    text = stringResource(R.string.discussions_nav_contacts),
-                    active = true,
-                    onClick = {}
-                )
-                BottomNavigationLabel(
-                    text = stringResource(R.string.discussions_nav_settings),
-                    active = false,
-                    onClick = {}
-                )
-            }
+            HiraBottomNavigation(
+                selected = HiraNavDestination.CONTACTS,
+                onDestinationClick = { destination ->
+                    if (destination == HiraNavDestination.DISCUSSIONS) {
+                        onDiscussionsClick()
+                    }
+                },
+                modifier = Modifier.testTag("contacts_bottom_navigation")
+            )
         }
     }
 }
