@@ -1,13 +1,10 @@
 package com.example.ui.discussions
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,6 +30,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.ui.components.HiraBottomNavigation
+import com.example.ui.components.HiraNavDestination
 import com.example.ui.components.HiraLogo
 import com.example.ui.theme.HiraBorder
 import com.example.ui.theme.HiraRoyalBlue
@@ -120,69 +119,15 @@ fun DiscussionsScreen(
                     .testTag("discussions_list")
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(64.dp)
-                    .background(HiraWhite)
-                    .testTag("discussions_bottom_navigation"),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                BottomNavigationLabel(
-                    text = stringResource(R.string.discussions_nav_discussions),
-                    active = true,
-                    onClick = {}
-                )
-                BottomNavigationLabel(
-                    text = stringResource(R.string.discussions_nav_groups),
-                    active = false,
-                    onClick = {}
-                )
-                BottomNavigationLabel(
-                    text = stringResource(R.string.discussions_nav_contacts),
-                    active = false,
-                    onClick = onContactsClick
-                )
-                BottomNavigationLabel(
-                    text = stringResource(R.string.discussions_nav_settings),
-                    active = false,
-                    onClick = {}
-                )
-            }
+            HiraBottomNavigation(
+                selected = HiraNavDestination.DISCUSSIONS,
+                onDestinationClick = { destination ->
+                    if (destination == HiraNavDestination.CONTACTS) {
+                        onContactsClick()
+                    }
+                },
+                modifier = Modifier.testTag("discussions_bottom_navigation")
+            )
         }
-    }
-}
-
-@Composable
-private fun RowScope.BottomNavigationLabel(
-    text: String,
-    active: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .weight(1f)
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .background(
-                    color = if (active) HiraRoyalBlue else Color.Transparent
-                )
-        )
-        Spacer(modifier = Modifier.height(3.dp))
-        Text(
-            text = text,
-            fontSize = 11.sp,
-            fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (active) HiraRoyalBlue else Color(0xFF9CA3AF),
-            fontFamily = FontFamily.SansSerif
-        )
     }
 }
