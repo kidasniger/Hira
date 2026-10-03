@@ -177,8 +177,8 @@ class MainActivity : ComponentActivity() {
                                         // Les contacts réels seront ouverts après la vérification du compte HIRA.
                                     },
                                     onDemoContactClick = {
-                                        selectedChatContactName = getString(R.string.contacts_demo_name)
-                                        selectedChatContactStatus = getString(R.string.contacts_demo_status)
+                                        selectedChatContactName = getString(com.hira.kidas.R.string.contacts_demo_name)
+                                        selectedChatContactStatus = getString(com.hira.kidas.R.string.contacts_demo_status)
                                         currentRoute = HiraRoutes.CHAT_PRIVE
                                     }
                                 )
