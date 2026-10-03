@@ -84,7 +84,7 @@
     <string name="contacts_permission_allow">Autoriser</string>
     <string name="contacts_permission_later">Plus tard</string>
     <string name="contacts_permission_icon_description">Contacts</string>
-    
+
     <!-- Écran 9 — Liste des discussions -->
     <string name="discussions_title">Hira</string>
     <string name="discussions_search_description">Rechercher une discussion</string>
@@ -92,22 +92,4 @@
     <string name="discussions_nav_groups">Groupes</string>
     <string name="discussions_nav_contacts">Contacts</string>
     <string name="discussions_nav_settings">Réglages</string>
-    <string name="discussions_sample_fatou_name">Fatou Sow</string>
-    <string name="discussions_sample_fatou_message">Super, à tout l\'heure !</string>
-    <string name="discussions_sample_fatou_time">09:12</string>
-    <string name="discussions_sample_ibrahim_name">Ibrahim Diop</string>
-    <string name="discussions_sample_ibrahim_message">Tu as vu la photo ?</string>
-    <string name="discussions_sample_ibrahim_time">Hier</string>
-    <string name="discussions_sample_family_name">Famille Diallo</string>
-    <string name="discussions_sample_family_message">Aïcha : D\'accord</string>
-    <string name="discussions_sample_family_time">Hier</string>
-    <string name="discussions_sample_maman_name">Maman</string>
-    <string name="discussions_sample_maman_message">Message vocal • 0:24</string>
-    <string name="discussions_sample_maman_time">Lun</string>
-    <string name="discussions_sample_aicha_name">Aïcha</string>
-    <string name="discussions_sample_aicha_message">Le fichier est prêt</string>
-    <string name="discussions_sample_aicha_time">Lun</string>
-    <string name="discussions_sample_boutique_name">Boutique Orange</string>
-    <string name="discussions_sample_boutique_message">Votre commande est prête</string>
-    <string name="discussions_sample_boutique_time">Dim</string>
 </resources>
