@@ -110,4 +110,17 @@
     <string name="chat_private_attachment_description">Pièces jointes</string>
     <string name="chat_private_message_hint">Message</string>
     <string name="chat_private_send_description">Envoyer</string>
+
+    <!-- Écran 12 — Menu des pièces jointes -->
+    <string name="attachment_photo">Photo</string>
+    <string name="attachment_video">Vidéo</string>
+    <string name="attachment_document">Document</string>
+    <string name="attachment_voice">Message vocal</string>
+
+    <!-- Contact par défaut pour parcourir l'application -->
+    <string name="contacts_demo_name">Utilisateur HIRA</string>
+    <string name="contacts_demo_status">Compte de test local</string>
+    <string name="contacts_message_action">Message</string>
+    <string name="contacts_invite_action">Inviter</string>
+
 </resources>
