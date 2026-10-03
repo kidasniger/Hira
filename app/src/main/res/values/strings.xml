@@ -31,7 +31,6 @@
     <string name="auth_email_hint">nom@exemple.com</string>
     <string name="auth_password_label">Mot de passe</string>
     <string name="auth_password_hint">••••••••</string>
-    <string name="auth_register_password_hint">Au moins 8 caractères</string>
     <string name="auth_show_password">Afficher le mot de passe</string>
     <string name="auth_hide_password">Masquer le mot de passe</string>
     <string name="auth_forgot_password">Mot de passe oublié ?</string>
@@ -66,4 +65,16 @@
     <string name="auth_error_generic">Une erreur est survenue. Veuillez réessayer.</string>
     <string name="auth_sign_out">Se déconnecter</string>
     <string name="auth_welcome_user">Connecté avec :</string>
+
+    <!-- Écran 7 — Configuration du profil -->
+    <string name="profile_setup_title">Votre profil</string>
+    <string name="profile_username_label">Nom d\'utilisateur</string>
+    <string name="profile_username_hint">@amina</string>
+    <string name="profile_display_name_label">Nom affiché</string>
+    <string name="profile_display_name_hint">Amina Diallo</string>
+    <string name="profile_setup_finish">Terminer</string>
+    <string name="profile_setup_username_required">Veuillez renseigner un nom d\'utilisateur.</string>
+    <string name="profile_setup_display_name_required">Veuillez renseigner un nom affiché.</string>
+    <string name="profile_setup_avatar_description">Photo de profil</string>
+    <string name="profile_setup_edit_photo_description">Modifier la photo de profil</string>
 </resources>

@@ -29,6 +29,7 @@ import com.example.ui.auth.AuthViewModel
 import com.example.ui.auth.LoginScreen
 import com.example.ui.auth.PlaceholderSessionScreen
 import com.example.ui.auth.RegisterScreen
+import com.example.ui.profile.ProfileSetupScreen
 import com.example.ui.onboarding.OnboardingScreen1
 import com.example.ui.onboarding.OnboardingScreen2
 import com.example.ui.onboarding.OnboardingScreen3
@@ -176,12 +177,9 @@ class MainActivity : ComponentActivity() {
                                 )
                             }
                             HiraRoutes.CONFIG_PROFIL -> {
-                                PlaceholderSessionScreen(
-                                    title = "Configuration du profil",
-                                    userEmail = authRepository.currentEmail(),
-                                    onSignOut = {
-                                        authRepository.signOut()
-                                        currentRoute = HiraRoutes.CONNEXION
+                                ProfileSetupScreen(
+                                    onFinish = { _, _ ->
+                                        currentRoute = HiraRoutes.DISCUSSIONS
                                     }
                                 )
                             }
