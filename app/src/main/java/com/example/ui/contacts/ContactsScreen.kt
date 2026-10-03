@@ -80,12 +80,13 @@ fun ContactsScreen(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    var contacts by remember {
+    val demoContactName = stringResource(R.string.contacts_demo_name)
+    var contacts by remember(demoContactName) {
         mutableStateOf(
             listOf(
                 PhoneContact(
                     id = DEMO_CONTACT_ID,
-                    name = stringResource(R.string.contacts_demo_name),
+                    name = demoContactName,
                     initials = "HI",
                     isDemo = true
                 )
