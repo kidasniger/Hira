@@ -26,14 +26,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.PersonAdd
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -162,40 +162,48 @@ fun ContactsScreen(
                     .background(HiraBorder)
             )
 
-            TextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(12.dp)
-                    .height(56.dp)
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFFF3F4F6))
+                    .padding(horizontal = 12.dp)
                     .testTag("contacts_search"),
-                placeholder = {
-                    Text(
-                        text = stringResource(R.string.contacts_search_hint),
-                        fontSize = 14.sp,
-                        color = Color(0xFF9CA3AF)
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Outlined.Search,
-                        contentDescription = stringResource(R.string.contacts_search_description),
-                        tint = Color(0xFF9CA3AF),
-                        modifier = Modifier.size(18.dp)
-                    )
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(12.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFFF3F4F6),
-                    unfocusedContainerColor = Color(0xFFF3F4F6),
-                    disabledContainerColor = Color(0xFFF3F4F6),
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Search,
+                    contentDescription = stringResource(R.string.contacts_search_description),
+                    tint = Color(0xFF9CA3AF),
+                    modifier = Modifier.size(18.dp)
                 )
-            )
+                Spacer(modifier = Modifier.width(8.dp))
+                BasicTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
+                    singleLine = true,
+                    textStyle = androidx.compose.ui.text.TextStyle(
+                        fontSize = 14.sp,
+                        color = Color(0xFF111111),
+                        fontFamily = FontFamily.SansSerif
+                    ),
+                    decorationBox = { innerTextField ->
+                        if (searchQuery.isBlank()) {
+                            Text(
+                                text = stringResource(R.string.contacts_search_hint),
+                                fontSize = 14.sp,
+                                color = Color(0xFF9CA3AF)
+                            )
+                        }
+                        innerTextField()
+                    }
+                )
+            }
 
             if (isLoading) {
                 Box(
@@ -265,18 +273,23 @@ fun ContactsScreen(
                     .background(HiraWhite)
                     .padding(16.dp)
             ) {
-                OutlinedButton(
+                Button(
                     onClick = onInviteClick,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp)
                         .testTag("contacts_invite_friend_button"),
-                    shape = RoundedCornerShape(14.dp)
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = HiraRoyalBlue,
+                        contentColor = HiraWhite
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.PersonAdd,
                         contentDescription = null,
-                        tint = HiraRoyalBlue,
+                        tint = HiraWhite,
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -284,7 +297,7 @@ fun ContactsScreen(
                         text = stringResource(R.string.contacts_invite_friend),
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold,
-                        color = HiraRoyalBlue
+                        color = HiraWhite
                     )
                 }
             }
