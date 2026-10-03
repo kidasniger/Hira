@@ -46,6 +46,26 @@ class MainActivity : ComponentActivity() {
     @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Initialisation de secours de Firebase si non effectuée
+        try {
+            if (com.google.firebase.FirebaseApp.getApps(this).isEmpty()) {
+                val app = com.google.firebase.FirebaseApp.initializeApp(this)
+                if (app == null) {
+                    val options = com.google.firebase.FirebaseOptions.Builder()
+                        .setApplicationId("1:129923565999:android:f65c07cce87001aae4475a")
+                        .setApiKey("AIzaSyAO8qEzAjd0-tLXcMLqrAJ3819ZXMboi2o")
+                        .setProjectId("hira-app-chat")
+                        .setStorageBucket("hira-app-chat.firebasestorage.app")
+                        .setGcmSenderId("129923565999")
+                        .build()
+                    com.google.firebase.FirebaseApp.initializeApp(this, options)
+                }
+            }
+        } catch (_: Exception) {
+            // Ignorer si déjà initialisé
+        }
+
         enableEdgeToEdge()
 
         // Gestion d'un éventuel Deep link (ex: notification push hira://update)
