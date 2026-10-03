@@ -65,18 +65,33 @@ import kotlinx.coroutines.withContext
 private data class PhoneContact(
     val id: Long,
     val name: String,
-    val initials: String
+    val initials: String,
+    val isDemo: Boolean = false
 )
+
+private const val DEMO_CONTACT_ID = Long.MIN_VALUE
 
 @Composable
 fun ContactsScreen(
     onDiscussionsClick: () -> Unit = {},
     onInviteClick: () -> Unit = {},
     onContactClick: (String) -> Unit = {},
+    onDemoContactClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    var contacts by remember { mutableStateOf<List<PhoneContact>>(emptyList()) }
+    var contacts by remember {
+        mutableStateOf(
+            listOf(
+                PhoneContact(
+                    id = DEMO_CONTACT_ID,
+                    name = stringResource(R.string.contacts_demo_name),
+                    initials = "HI",
+                    isDemo = true
+                )
+            )
+        )
+    }
     var searchQuery by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
 
@@ -87,9 +102,17 @@ fun ContactsScreen(
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             isLoading = true
-            contacts = withContext(Dispatchers.IO) {
+            val realContacts = withContext(Dispatchers.IO) {
                 loadPhoneContacts(context)
             }
+            contacts = listOf(
+                PhoneContact(
+                    id = DEMO_CONTACT_ID,
+                    name = context.getString(R.string.contacts_demo_name),
+                    initials = "HI",
+                    isDemo = true
+                )
+            ) + realContacts.filter { it.name != context.getString(R.string.contacts_demo_name) }
             isLoading = false
         }
     }
@@ -261,7 +284,13 @@ fun ContactsScreen(
                         ) { contact ->
                             ContactRow(
                                 contact = contact,
-                                onClick = { onContactClick(contact.name) }
+                                onClick = {
+                                    if (contact.isDemo) {
+                                        onDemoContactClick()
+                                    } else {
+                                        onContactClick(contact.name)
+                                    }
+                                }
                             )
                         }
                     }
@@ -348,15 +377,39 @@ private fun ContactRow(
 
         Spacer(modifier = Modifier.width(12.dp))
 
-        Text(
-            text = contact.name,
+        Column(
             modifier = Modifier.weight(1f),
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color(0xFF111111),
-            fontFamily = FontFamily.SansSerif,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = contact.name,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color(0xFF111111),
+                fontFamily = FontFamily.SansSerif,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            if (contact.isDemo) {
+                Text(
+                    text = stringResource(R.string.contacts_demo_status),
+                    fontSize = 11.sp,
+                    color = HiraGrayDark,
+                    fontFamily = FontFamily.SansSerif,
+                    maxLines = 1
+                )
+            }
+        }
+
+        Text(
+            text = stringResource(
+                if (contact.isDemo) R.string.contacts_message_action
+                else R.string.contacts_invite_action
+            ),
+            fontSize = 12.sp,
+            fontWeight = FontWeight.SemiBold,
+            color = HiraRoyalBlue,
+            fontFamily = FontFamily.SansSerif
         )
     }
 }
