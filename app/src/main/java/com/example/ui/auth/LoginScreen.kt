@@ -105,6 +105,8 @@ fun LoginScreen(
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
+    // Retour visuel immédiat pendant l'ouverture de Credential Manager Google.
+    var isGoogleLoading by rememberSaveable { mutableStateOf(false) }
 
     // Quitter l'application sur retour arrière depuis Connexion
     BackHandler {
@@ -166,20 +168,27 @@ fun LoginScreen(
             // Bouton Continuer avec Google
             OutlinedButton(
                 onClick = {
-                    if (uiState.isLoading) return@OutlinedButton
+                    if (uiState.isLoading || isGoogleLoading) return@OutlinedButton
+                    isGoogleLoading = true
                     scope.launch {
-                        val tokenResult = googleSignInHelper.getGoogleIdToken()
-                        tokenResult.fold(
-                            onSuccess = { token ->
-                                viewModel.signInWithGoogleToken(token)
-                            },
-                            onFailure = { error ->
-                                viewModel.onGoogleSignInError(error)
-                            }
-                        )
+                        try {
+                            val tokenResult = googleSignInHelper.getGoogleIdToken()
+                            tokenResult.fold(
+                                onSuccess = { token ->
+                                    viewModel.signInWithGoogleToken(token)
+                                },
+                                onFailure = { error ->
+                                    viewModel.onGoogleSignInError(error)
+                                }
+                            )
+                        } finally {
+                            // Pour une authentification réussie, uiState.isLoading prend le relais
+                            // pendant l'appel Firebase. En cas d'annulation/erreur, on réactive le bouton.
+                            isGoogleLoading = false
+                        }
                     }
                 },
-                enabled = !uiState.isLoading,
+                enabled = !uiState.isLoading && !isGoogleLoading,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp)
@@ -194,24 +203,32 @@ fun LoginScreen(
                     width = 1.dp
                 )
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    // Logo Google officiel
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_google_logo),
-                        contentDescription = stringResource(id = R.string.auth_google_continue),
-                        modifier = Modifier.size(22.dp)
+                if (isGoogleLoading || uiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(22.dp),
+                        color = HiraRoyalBlue,
+                        strokeWidth = 2.dp
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = stringResource(id = R.string.auth_google_continue),
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF111111),
-                        fontFamily = FontFamily.SansSerif
-                    )
+                } else {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        // Logo Google officiel
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_google_logo),
+                            contentDescription = stringResource(id = R.string.auth_google_continue),
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = stringResource(id = R.string.auth_google_continue),
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color(0xFF111111),
+                            fontFamily = FontFamily.SansSerif
+                        )
+                    }
                 }
             }
 
