@@ -21,4 +21,48 @@
     <string name="onboarding_3_tagline">Envoyez vos messages même en 2G ou réseau instable. La compression intelligente préserve vos données mobiles et votre batterie.</string>
     <string name="onboarding_start">Commencer</string>
     <string name="onboarding_step_3_of_3">Écran 3 sur 3</string>
+
+    <!-- Authentification (Écrans 5 & 6) -->
+    <string name="auth_login_title">Connexion</string>
+    <string name="auth_login_subtitle">Connectez-vous pour retrouver vos discussions.</string>
+    <string name="auth_google_continue">Continuer avec Google</string>
+    <string name="auth_or_divider">ou</string>
+    <string name="auth_email_label">E-mail</string>
+    <string name="auth_email_hint">nom@exemple.com</string>
+    <string name="auth_password_label">Mot de passe</string>
+    <string name="auth_password_hint">••••••••</string>
+    <string name="auth_show_password">Afficher le mot de passe</string>
+    <string name="auth_hide_password">Masquer le mot de passe</string>
+    <string name="auth_forgot_password">Mot de passe oublié ?</string>
+    <string name="auth_login_button">Se connecter</string>
+    <string name="auth_no_account_yet">Pas encore de compte ?</string>
+    <string name="auth_go_to_signup">Créer un compte</string>
+
+    <string name="auth_register_title">Créer un compte</string>
+    <string name="auth_register_subtitle">Rejoignez Hira et échangez simplement.</string>
+    <string name="auth_confirm_password_label">Confirmer le mot de passe</string>
+    <string name="auth_confirm_password_hint">••••••••</string>
+    <string name="auth_cgu_checkbox">J\'accepte les conditions d\'utilisation</string>
+    <string name="auth_register_button">Créer mon compte</string>
+    <string name="auth_already_have_account">Vous avez déjà un compte ?</string>
+    <string name="auth_go_to_login">Se connecter</string>
+
+    <string name="auth_forgot_password_neutral_message">Si un compte existe pour cette adresse, un lien de réinitialisation vous a été envoyé.</string>
+    <string name="auth_cgu_required">Veuillez accepter les conditions d\'utilisation.</string>
+    <string name="auth_error_invalid_email">Veuillez saisir une adresse e-mail valide.</string>
+    <string name="auth_error_weak_password">Le mot de passe doit comporter au moins 8 caractères.</string>
+    <string name="auth_error_passwords_mismatch">Les mots de passe ne correspondent pas.</string>
+
+    <string name="auth_error_invalid_credential">Identifiants incorrects. Vérifiez votre e-mail et mot de passe.</string>
+    <string name="auth_error_user_not_found">Aucun compte associé à cette adresse e-mail.</string>
+    <string name="auth_error_wrong_password">Mot de passe incorrect.</string>
+    <string name="auth_error_email_already_in_use">Cette adresse e-mail est déjà associée à un compte.</string>
+    <string name="auth_error_network">Erreur de connexion. Vérifiez votre accès Internet.</string>
+    <string name="auth_error_too_many_requests">Trop de tentatives. Veuillez patienter un instant.</string>
+    <string name="auth_error_operation_not_allowed">Ce mode de connexion n\'est pas activé.</string>
+    <string name="auth_error_google_cancelled">Connexion Google annulée.</string>
+    <string name="auth_error_google_no_account">Aucun compte Google disponible sur cet appareil.</string>
+    <string name="auth_error_generic">Une erreur est survenue. Veuillez réessayer.</string>
+    <string name="auth_sign_out">Se déconnecter</string>
+    <string name="auth_welcome_user">Connecté avec :</string>
 </resources>

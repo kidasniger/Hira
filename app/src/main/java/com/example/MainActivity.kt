@@ -21,8 +21,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.data.auth.AuthRepository
 import com.example.data.local.OnboardingPreferences
 import com.example.navigation.HiraRoutes
+import com.example.ui.auth.AuthNavigationEvent
+import com.example.ui.auth.AuthViewModel
+import com.example.ui.auth.LoginScreen
+import com.example.ui.auth.PlaceholderSessionScreen
+import com.example.ui.auth.RegisterScreen
 import com.example.ui.onboarding.OnboardingScreen1
 import com.example.ui.onboarding.OnboardingScreen2
 import com.example.ui.onboarding.OnboardingScreen3
@@ -34,6 +40,8 @@ import com.example.ui.update.UpdateViewModel
 class MainActivity : ComponentActivity() {
 
     private val updateViewModel: UpdateViewModel by viewModels()
+    private val authRepository = AuthRepository()
+    private val authViewModel: AuthViewModel by viewModels()
 
     @OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,8 +54,25 @@ class MainActivity : ComponentActivity() {
         setContent {
             HiraTheme {
                 val updateState by updateViewModel.updateState.collectAsStateWithLifecycle()
+                val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
                 val onboardingPreferences = remember { OnboardingPreferences(applicationContext) }
                 var currentRoute by rememberSaveable { mutableStateOf(HiraRoutes.SPLASH) }
+
+                // Écoute de l'événement de navigation après authentification réussie
+                // Consommé une seule fois grâce au Channel
+                LaunchedEffect(authViewModel) {
+                    authViewModel.navigationEvent.collect { event ->
+                        when (event) {
+                            is AuthNavigationEvent.NavigateSuccess -> {
+                                currentRoute = if (event.isNewUser) {
+                                    HiraRoutes.CONFIG_PROFIL
+                                } else {
+                                    HiraRoutes.DISCUSSIONS
+                                }
+                            }
+                        }
+                    }
+                }
 
                 // Vérification automatique au démarrage (avec throttling intégré)
                 LaunchedEffect(Unit) {
@@ -68,11 +93,13 @@ class MainActivity : ComponentActivity() {
                             HiraRoutes.SPLASH -> {
                                 SplashScreen(
                                     onSplashFinished = {
-                                        // Si l'utilisateur a déjà complété l'onboarding, diriger directement vers Connexion
-                                        currentRoute = if (onboardingPreferences.isOnboardingCompleted()) {
-                                            HiraRoutes.CONNEXION
-                                        } else {
-                                            HiraRoutes.ACCUEIL_1
+                                        // Priorité 1 : Session existante -> DISCUSSIONS direct
+                                        // Priorité 2 : Onboarding complété -> CONNEXION
+                                        // Priorité 3 : Nouvel utilisateur -> ACCUEIL_1
+                                        currentRoute = when {
+                                            authRepository.isSignedIn() -> HiraRoutes.DISCUSSIONS
+                                            onboardingPreferences.isOnboardingCompleted() -> HiraRoutes.CONNEXION
+                                            else -> HiraRoutes.ACCUEIL_1
                                         }
                                     }
                                 )
@@ -80,14 +107,12 @@ class MainActivity : ComponentActivity() {
                             HiraRoutes.ACCUEIL_1 -> {
                                 OnboardingScreen1(
                                     onNextClick = {
-                                        // Cible de navigation vers Accueil 2/3
                                         currentRoute = HiraRoutes.ACCUEIL_2
                                     },
                                     onSkipClick = {
                                         currentRoute = HiraRoutes.ACCUEIL_3
                                     },
                                     onBack = {
-                                        // Sortie propre sans retour en boucle vers le Splash
                                         finish()
                                     }
                                 )
@@ -95,14 +120,12 @@ class MainActivity : ComponentActivity() {
                             HiraRoutes.ACCUEIL_2 -> {
                                 OnboardingScreen2(
                                     onNextClick = {
-                                        // Cible de navigation vers Accueil 3/3
                                         currentRoute = HiraRoutes.ACCUEIL_3
                                     },
                                     onSkipClick = {
                                         currentRoute = HiraRoutes.ACCUEIL_3
                                     },
                                     onBackClick = {
-                                        // Retour vers Accueil 1/3
                                         currentRoute = HiraRoutes.ACCUEIL_1
                                     }
                                 )
@@ -110,23 +133,57 @@ class MainActivity : ComponentActivity() {
                             HiraRoutes.ACCUEIL_3 -> {
                                 OnboardingScreen3(
                                     onFinishClick = {
-                                        // Règle stricte : marquer l'onboarding terminé UNIQUEMENT ici
                                         onboardingPreferences.setOnboardingStep(3)
                                         onboardingPreferences.setOnboardingCompleted(true)
                                         currentRoute = HiraRoutes.CONNEXION
                                     },
                                     onBackClick = {
-                                        // Retour vers Accueil 2/3
                                         currentRoute = HiraRoutes.ACCUEIL_2
                                     }
                                 )
                             }
                             HiraRoutes.CONNEXION -> {
-                                // Destination de navigation vers l'Écran 5 (Connexion)
-                                // Interface non implémentée selon les consignes strictes (étape suivante)
-                                BackHandler {
-                                    finish()
-                                }
+                                LoginScreen(
+                                    viewModel = authViewModel,
+                                    uiState = authUiState,
+                                    onNavigateToRegister = {
+                                        authViewModel.clearErrors()
+                                        currentRoute = HiraRoutes.CREATION_COMPTE
+                                    },
+                                    onBack = {
+                                        finish()
+                                    }
+                                )
+                            }
+                            HiraRoutes.CREATION_COMPTE -> {
+                                RegisterScreen(
+                                    viewModel = authViewModel,
+                                    uiState = authUiState,
+                                    onBackToLogin = {
+                                        authViewModel.clearErrors()
+                                        currentRoute = HiraRoutes.CONNEXION
+                                    }
+                                )
+                            }
+                            HiraRoutes.DISCUSSIONS -> {
+                                PlaceholderSessionScreen(
+                                    title = "Discussions",
+                                    userEmail = authRepository.currentEmail(),
+                                    onSignOut = {
+                                        authRepository.signOut()
+                                        currentRoute = HiraRoutes.CONNEXION
+                                    }
+                                )
+                            }
+                            HiraRoutes.CONFIG_PROFIL -> {
+                                PlaceholderSessionScreen(
+                                    title = "Configuration du profil",
+                                    userEmail = authRepository.currentEmail(),
+                                    onSignOut = {
+                                        authRepository.signOut()
+                                        currentRoute = HiraRoutes.CONNEXION
+                                    }
+                                )
                             }
                         }
                     }
