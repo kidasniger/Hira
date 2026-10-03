@@ -92,4 +92,14 @@
     <string name="discussions_nav_groups">Groupes</string>
     <string name="discussions_nav_contacts">Contacts</string>
     <string name="discussions_nav_settings">Réglages</string>
+
+    <!-- Écran 10 — Liste des contacts -->
+    <string name="contacts_title">Contacts</string>
+    <string name="contacts_invite">Inviter</string>
+    <string name="contacts_invite_description">Inviter un ami</string>
+    <string name="contacts_search_hint">Rechercher</string>
+    <string name="contacts_search_description">Rechercher un contact</string>
+    <string name="contacts_loading">Chargement des contacts…</string>
+    <string name="contacts_empty">Aucun contact disponible sur cet appareil.</string>
+    <string name="contacts_invite_friend">Inviter un ami</string>
 </resources>
