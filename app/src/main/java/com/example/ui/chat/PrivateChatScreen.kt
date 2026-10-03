@@ -46,7 +46,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.ui.theme.HiraBlack
-import com.example.ui.theme.HiraBorder
 import com.example.ui.theme.HiraGrayMedium
 import com.example.ui.theme.HiraRoyalBlue
 import com.example.ui.theme.HiraRoyalBlueLight
@@ -300,7 +299,7 @@ private fun MessageBubble(
 }
 
 private fun initialsFor(name: String): String {
-    val parts = name.trim().split(Regex("\s+")).filter { it.isNotBlank() }
+    val parts = name.trim().split(Regex("\\s+")).filter { it.isNotBlank() }
     return when {
         parts.size >= 2 -> (parts.first().first().toString() + parts.last().first()).uppercase()
         parts.size == 1 -> parts.first().take(2).uppercase()
