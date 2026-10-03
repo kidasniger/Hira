@@ -59,7 +59,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.components.HiraLogo
 import com.example.ui.theme.HiraBorder
 import com.example.ui.theme.HiraGrayDark
 import com.example.ui.theme.HiraGrayMedium
@@ -110,19 +109,14 @@ fun RegisterScreen(
             .imePadding()
             .testTag("register_screen")
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Barre supérieure avec bouton Retour vers Connexion
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Barre supérieure conforme à la maquette validée de l'écran 6
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.Start,
+                    .height(56.dp)
+                    .padding(horizontal = 8.dp)
+                    .background(HiraWhite),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(
@@ -137,304 +131,296 @@ fun RegisterScreen(
                         tint = HiraGrayDark
                     )
                 }
-            }
-
-            // Logo HIRA
-            HiraLogo(
-                size = 64.dp,
-                tint = HiraRoyalBlue,
-                isAnimated = false,
-                modifier = Modifier.testTag("register_logo")
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Titre de l'écran
-            Text(
-                text = stringResource(id = R.string.auth_register_title),
-                fontSize = 28.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF111111),
-                textAlign = TextAlign.Center,
-                fontFamily = FontFamily.SansSerif,
-                modifier = Modifier.testTag("register_title")
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = stringResource(id = R.string.auth_register_subtitle),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal,
-                color = HiraGrayDark,
-                textAlign = TextAlign.Center,
-                fontFamily = FontFamily.SansSerif
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Champ E-mail
-            OutlinedTextField(
-                value = email,
-                onValueChange = {
-                    email = it
-                    if (uiState.emailError != null) viewModel.clearErrors()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("register_email_input"),
-                label = { Text(stringResource(id = R.string.auth_email_label), color = HiraGrayDark) },
-                placeholder = { Text(stringResource(id = R.string.auth_email_hint), color = HiraGrayMedium) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(
-                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                ),
-                isError = uiState.emailError != null,
-                supportingText = uiState.emailError?.let {
-                    { Text(text = stringResource(id = it), color = Color(0xFFD32F2F), fontSize = 12.sp) }
-                },
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color(0xFF111111),
-                    unfocusedTextColor = Color(0xFF111111),
-                    focusedContainerColor = HiraWhite,
-                    unfocusedContainerColor = HiraWhite,
-                    focusedBorderColor = HiraRoyalBlue,
-                    unfocusedBorderColor = HiraBorder,
-                    errorBorderColor = Color(0xFFD32F2F)
-                )
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Champ Mot de passe
-            OutlinedTextField(
-                value = password,
-                onValueChange = {
-                    password = it
-                    if (uiState.passwordError != null) viewModel.clearErrors()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("register_password_input"),
-                label = { Text(stringResource(id = R.string.auth_password_label), color = HiraGrayDark) },
-                placeholder = { Text(stringResource(id = R.string.auth_password_hint), color = HiraGrayMedium) },
-                singleLine = true,
-                visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(
-                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                ),
-                trailingIcon = {
-                    IconButton(
-                        onClick = { isPasswordVisible = !isPasswordVisible },
-                        modifier = Modifier.testTag("register_toggle_password_visibility")
-                    ) {
-                        Icon(
-                            imageVector = if (isPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                            contentDescription = stringResource(
-                                id = if (isPasswordVisible) R.string.auth_hide_password else R.string.auth_show_password
-                            ),
-                            tint = HiraGrayDark
-                        )
-                    }
-                },
-                isError = uiState.passwordError != null,
-                supportingText = uiState.passwordError?.let {
-                    { Text(text = stringResource(id = it), color = Color(0xFFD32F2F), fontSize = 12.sp) }
-                },
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color(0xFF111111),
-                    unfocusedTextColor = Color(0xFF111111),
-                    focusedContainerColor = HiraWhite,
-                    unfocusedContainerColor = HiraWhite,
-                    focusedBorderColor = HiraRoyalBlue,
-                    unfocusedBorderColor = HiraBorder,
-                    errorBorderColor = Color(0xFFD32F2F)
-                )
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Champ Confirmation mot de passe
-            OutlinedTextField(
-                value = confirmPassword,
-                onValueChange = {
-                    confirmPassword = it
-                    if (uiState.confirmPasswordError != null) viewModel.clearErrors()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("register_confirm_password_input"),
-                label = { Text(stringResource(id = R.string.auth_confirm_password_label), color = HiraGrayDark) },
-                placeholder = { Text(stringResource(id = R.string.auth_confirm_password_hint), color = HiraGrayMedium) },
-                singleLine = true,
-                visualTransformation = if (isConfirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        focusManager.clearFocus()
-                        viewModel.signUpWithEmail(email, password, confirmPassword, isCguAccepted)
-                    }
-                ),
-                trailingIcon = {
-                    IconButton(
-                        onClick = { isConfirmPasswordVisible = !isConfirmPasswordVisible },
-                        modifier = Modifier.testTag("register_toggle_confirm_password_visibility")
-                    ) {
-                        Icon(
-                            imageVector = if (isConfirmPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
-                            contentDescription = stringResource(
-                                id = if (isConfirmPasswordVisible) R.string.auth_hide_password else R.string.auth_show_password
-                            ),
-                            tint = HiraGrayDark
-                        )
-                    }
-                },
-                isError = uiState.confirmPasswordError != null,
-                supportingText = uiState.confirmPasswordError?.let {
-                    { Text(text = stringResource(id = it), color = Color(0xFFD32F2F), fontSize = 12.sp) }
-                },
-                shape = RoundedCornerShape(12.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color(0xFF111111),
-                    unfocusedTextColor = Color(0xFF111111),
-                    focusedContainerColor = HiraWhite,
-                    unfocusedContainerColor = HiraWhite,
-                    focusedBorderColor = HiraRoyalBlue,
-                    unfocusedBorderColor = HiraBorder,
-                    errorBorderColor = Color(0xFFD32F2F)
-                )
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Case CGU
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = isCguAccepted,
-                    onCheckedChange = {
-                        isCguAccepted = it
-                        if (uiState.cguError != null) viewModel.clearErrors()
-                    },
-                    modifier = Modifier.testTag("register_cgu_checkbox"),
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = HiraRoyalBlue,
-                        uncheckedColor = HiraBorder,
-                        checkmarkColor = HiraWhite
-                    )
-                )
-                Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = stringResource(id = R.string.auth_cgu_checkbox),
-                    fontSize = 13.sp,
+                    text = stringResource(id = R.string.auth_register_title),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF111111),
-                    fontFamily = FontFamily.SansSerif
+                    fontFamily = FontFamily.SansSerif,
+                    modifier = Modifier.padding(start = 4.dp)
                 )
             }
 
-            if (uiState.cguError != null) {
-                Text(
-                    text = stringResource(id = uiState.cguError),
-                    color = Color(0xFFD32F2F),
-                    fontSize = 12.sp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 12.dp, bottom = 8.dp)
-                )
-            }
-
-            // Message d'erreur global
-            if (uiState.generalError != null) {
-                Text(
-                    text = stringResource(id = uiState.generalError),
-                    color = Color(0xFFD32F2F),
-                    fontSize = 13.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .testTag("register_general_error")
-                )
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Bouton principal Créer mon compte
-            Button(
-                onClick = {
-                    focusManager.clearFocus()
-                    viewModel.signUpWithEmail(email, password, confirmPassword, isCguAccepted)
-                },
-                enabled = !uiState.isLoading,
+            // Contenu défilable de création de compte
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(52.dp)
-                    .testTag("register_submit_button"),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = HiraRoyalBlue,
-                    contentColor = HiraWhite
-                ),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                    .weight(1f)
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 20.dp, vertical = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (uiState.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(22.dp),
-                        color = HiraWhite,
-                        strokeWidth = 2.dp
+                // Champ E-mail
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = {
+                        email = it
+                        if (uiState.emailError != null) viewModel.clearErrors()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .widthIn(max = 320.dp)
+                        .testTag("register_email_input"),
+                    label = { Text(stringResource(id = R.string.auth_email_label), color = HiraGrayDark) },
+                    placeholder = { Text(stringResource(id = R.string.auth_email_hint), color = HiraGrayMedium) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    ),
+                    isError = uiState.emailError != null,
+                    supportingText = uiState.emailError?.let {
+                        { Text(text = stringResource(id = it), color = Color(0xFFD32F2F), fontSize = 12.sp) }
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color(0xFF111111),
+                        unfocusedTextColor = Color(0xFF111111),
+                        focusedContainerColor = HiraWhite,
+                        unfocusedContainerColor = HiraWhite,
+                        focusedBorderColor = HiraRoyalBlue,
+                        unfocusedBorderColor = HiraBorder,
+                        errorBorderColor = Color(0xFFD32F2F)
                     )
-                } else {
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Champ Mot de passe
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = {
+                        password = it
+                        if (uiState.passwordError != null) viewModel.clearErrors()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .widthIn(max = 320.dp)
+                        .testTag("register_password_input"),
+                    label = { Text(stringResource(id = R.string.auth_password_label), color = HiraGrayDark) },
+                    placeholder = { Text(stringResource(id = R.string.auth_register_password_hint), color = HiraGrayMedium) },
+                    singleLine = true,
+                    visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    ),
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { isPasswordVisible = !isPasswordVisible },
+                            modifier = Modifier.testTag("register_toggle_password_visibility")
+                        ) {
+                            Icon(
+                                imageVector = if (isPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                contentDescription = stringResource(
+                                    id = if (isPasswordVisible) R.string.auth_hide_password else R.string.auth_show_password
+                                ),
+                                tint = HiraGrayDark
+                            )
+                        }
+                    },
+                    isError = uiState.passwordError != null,
+                    supportingText = uiState.passwordError?.let {
+                        { Text(text = stringResource(id = it), color = Color(0xFFD32F2F), fontSize = 12.sp) }
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color(0xFF111111),
+                        unfocusedTextColor = Color(0xFF111111),
+                        focusedContainerColor = HiraWhite,
+                        unfocusedContainerColor = HiraWhite,
+                        focusedBorderColor = HiraRoyalBlue,
+                        unfocusedBorderColor = HiraBorder,
+                        errorBorderColor = Color(0xFFD32F2F)
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Champ Confirmation mot de passe
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = {
+                        confirmPassword = it
+                        if (uiState.confirmPasswordError != null) viewModel.clearErrors()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .widthIn(max = 320.dp)
+                        .testTag("register_confirm_password_input"),
+                    label = { Text(stringResource(id = R.string.auth_confirm_password_label), color = HiraGrayDark) },
+                    placeholder = { Text(stringResource(id = R.string.auth_confirm_password_hint), color = HiraGrayMedium) },
+                    singleLine = true,
+                    visualTransformation = if (isConfirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                            viewModel.signUpWithEmail(email, password, confirmPassword, isCguAccepted)
+                        }
+                    ),
+                    trailingIcon = {
+                        IconButton(
+                            onClick = { isConfirmPasswordVisible = !isConfirmPasswordVisible },
+                            modifier = Modifier.testTag("register_toggle_confirm_password_visibility")
+                        ) {
+                            Icon(
+                                imageVector = if (isConfirmPasswordVisible) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                contentDescription = stringResource(
+                                    id = if (isConfirmPasswordVisible) R.string.auth_hide_password else R.string.auth_show_password
+                                ),
+                                tint = HiraGrayDark
+                            )
+                        }
+                    },
+                    isError = uiState.confirmPasswordError != null,
+                    supportingText = uiState.confirmPasswordError?.let {
+                        { Text(text = stringResource(id = it), color = Color(0xFFD32F2F), fontSize = 12.sp) }
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color(0xFF111111),
+                        unfocusedTextColor = Color(0xFF111111),
+                        focusedContainerColor = HiraWhite,
+                        unfocusedContainerColor = HiraWhite,
+                        focusedBorderColor = HiraRoyalBlue,
+                        unfocusedBorderColor = HiraBorder,
+                        errorBorderColor = Color(0xFFD32F2F)
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Case CGU
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .widthIn(max = 320.dp)
+                        .padding(vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = isCguAccepted,
+                        onCheckedChange = {
+                            isCguAccepted = it
+                            if (uiState.cguError != null) viewModel.clearErrors()
+                        },
+                        modifier = Modifier.testTag("register_cgu_checkbox"),
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = HiraRoyalBlue,
+                            uncheckedColor = HiraBorder,
+                            checkmarkColor = HiraWhite
+                        )
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = stringResource(id = R.string.auth_register_button),
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold,
-                        fontFamily = FontFamily.SansSerif
+                        text = stringResource(id = R.string.auth_cgu_checkbox),
+                        fontSize = 13.sp,
+                        color = Color(0xFF555555),
+                        fontFamily = FontFamily.SansSerif,
+                        modifier = Modifier.weight(1f)
                     )
                 }
-            }
 
-            Spacer(modifier = Modifier.height(24.dp))
+                if (uiState.cguError != null) {
+                    Text(
+                        text = stringResource(id = uiState.cguError),
+                        color = Color(0xFFD32F2F),
+                        fontSize = 12.sp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .widthIn(max = 320.dp)
+                            .padding(start = 12.dp, bottom = 4.dp)
+                    )
+                }
 
-            // Lien vers Se connecter
-            Row(
-                modifier = Modifier.padding(bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(id = R.string.auth_already_have_account),
-                    fontSize = 14.sp,
-                    color = HiraGrayDark,
-                    fontFamily = FontFamily.SansSerif
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                TextButton(
-                    onClick = onBackToLogin,
-                    modifier = Modifier.testTag("register_go_to_login_button")
+                // Message d'erreur global
+                if (uiState.generalError != null) {
+                    Text(
+                        text = stringResource(id = uiState.generalError),
+                        color = Color(0xFFD32F2F),
+                        fontSize = 13.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .widthIn(max = 320.dp)
+                            .padding(vertical = 4.dp)
+                            .testTag("register_general_error")
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Bouton principal Créer mon compte
+                Button(
+                    onClick = {
+                        focusManager.clearFocus()
+                        viewModel.signUpWithEmail(email, password, confirmPassword, isCguAccepted)
+                    },
+                    enabled = !uiState.isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .widthIn(max = 320.dp)
+                        .height(52.dp)
+                        .testTag("register_submit_button"),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = HiraRoyalBlue,
+                        contentColor = HiraWhite
+                    ),
+                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 0.dp)
+                ) {
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(22.dp),
+                            color = HiraWhite,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(id = R.string.auth_register_button),
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                            fontFamily = FontFamily.SansSerif
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Lien vers Se connecter
+                Row(
+                    modifier = Modifier.padding(bottom = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = stringResource(id = R.string.auth_go_to_login),
+                        text = stringResource(id = R.string.auth_already_have_account),
                         fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = HiraRoyalBlue,
+                        color = HiraGrayDark,
                         fontFamily = FontFamily.SansSerif
                     )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    TextButton(
+                        onClick = onBackToLogin,
+                        modifier = Modifier.testTag("register_go_to_login_button")
+                    ) {
+                        Text(
+                            text = stringResource(id = R.string.auth_go_to_login),
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = HiraRoyalBlue,
+                            fontFamily = FontFamily.SansSerif
+                        )
+                    }
                 }
             }
         }
