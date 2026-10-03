@@ -1,0 +1,229 @@
+name: Build and Release HIRA
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: release-hira-main
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: Build, Sign and Release APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate Signing Secrets
+        id: check-secrets
+        run: |
+          if [ -z "${{ secrets.KEYSTORE_BASE64 }}" ]; then
+            echo "::error::Secret KEYSTORE_BASE64 manquant dans le dépôt GitHub."
+            exit 1
+          fi
+          if [ -z "${{ secrets.STORE_PASSWORD }}" ]; then
+            echo "::error::Secret STORE_PASSWORD manquant dans le dépôt GitHub."
+            exit 1
+          fi
+          if [ -z "${{ secrets.KEY_ALIAS }}" ]; then
+            echo "::error::Secret KEY_ALIAS manquant dans le dépôt GitHub."
+            exit 1
+          fi
+          if [ -z "${{ secrets.KEY_PASSWORD }}" ]; then
+            echo "::error::Secret KEY_PASSWORD manquant dans le dépôt GitHub."
+            exit 1
+          fi
+          echo "Tous les secrets de signature requis sont configurés."
+
+      - name: Reconstruct Production Keystore
+        run: |
+          printf '%s' "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > hira-release.jks
+          if [ ! -s hira-release.jks ]; then
+            echo "::error::Le keystore décodé est vide ou invalide."
+            rm -f hira-release.jks
+            exit 1
+          fi
+          echo "Keystore reconstruit temporairement pour le build de release."
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: false
+
+      - name: Determine New Semantic Version
+        id: versioning
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 1. Récupérer la dernière release GitHub officielle
+          LATEST_TAG=$(gh release view --json tagName -q .tagName 2>/dev/null || git tag -l "v*" --sort=-v:refname | head -n 1)
+
+          if [ -z "$LATEST_TAG" ]; then
+            echo "Aucune release GitHub existante trouvée. Initialisation à v1.0.1."
+            NEW_VERSION="1.0.1"
+            NEW_VERSION_CODE=1
+          else
+            echo "Dernière release GitHub détectée : $LATEST_TAG"
+            CLEAN_TAG="${LATEST_TAG#v}"
+            CLEAN_TAG="${CLEAN_TAG#V}"
+
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$CLEAN_TAG"
+            MAJOR=${MAJOR:-1}
+            MINOR=${MINOR:-0}
+            PATCH=${PATCH:-0}
+
+            # Incrément strictement supérieur
+            PATCH=$((PATCH + 1))
+            NEW_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+
+            # Calcul du versionCode strictement croissant
+            TOTAL_TAGS=$(git tag -l "v*" | wc -l)
+            NEW_VERSION_CODE=$((TOTAL_TAGS + 1))
+            if [ "$NEW_VERSION_CODE" -le "$PATCH" ]; then
+              NEW_VERSION_CODE=$PATCH
+            fi
+          fi
+
+          TAG_NAME="v${NEW_VERSION}"
+          echo "Nouvelle version cible : ${NEW_VERSION} (versionCode: ${NEW_VERSION_CODE}, tag: ${TAG_NAME})"
+
+          # Vérifier que le tag n'existe pas déjà
+          if git rev-parse "$TAG_NAME" >/dev/null 2>&1; then
+            echo "::error::Le tag $TAG_NAME existe déjà. Arrêt pour éviter une release dupliquée."
+            exit 1
+          fi
+
+          echo "version_name=${NEW_VERSION}" >> $GITHUB_OUTPUT
+          echo "version_code=${NEW_VERSION_CODE}" >> $GITHUB_OUTPUT
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Make Gradle Wrapper Executable
+        run: chmod +x gradlew
+
+      - name: Run Lint
+        env:
+          KEYSTORE_PATH: hira-release.jks
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew lintRelease --stacktrace
+
+      - name: Run Unit Tests
+        env:
+          KEYSTORE_PATH: hira-release.jks
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew test --stacktrace
+
+      - name: Build Signed Release APK
+        env:
+          KEYSTORE_PATH: hira-release.jks
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          VERSION_NAME: ${{ steps.versioning.outputs.version_name }}
+          VERSION_CODE: ${{ steps.versioning.outputs.version_code }}
+        run: |
+          ./gradlew assembleRelease \
+            -PversionName="${{ steps.versioning.outputs.version_name }}" \
+            -PversionCode="${{ steps.versioning.outputs.version_code }}" \
+            --stacktrace
+
+      - name: Validate APK, Signature and Integrity
+        run: |
+          APK_PATH=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
+          if [ -z "$APK_PATH" ] || [ ! -f "$APK_PATH" ]; then
+            echo "::error::Aucun APK release n'a été produit par assembleRelease."
+            exit 1
+          fi
+
+          APK_SIZE=$(stat -c%s "$APK_PATH")
+          if [ "$APK_SIZE" -le 0 ]; then
+            echo "::error::L'APK généré est vide ($APK_SIZE octets)."
+            exit 1
+          fi
+          echo "APK trouvé : $APK_PATH ($APK_SIZE octets)"
+
+          BUILD_TOOLS_DIR=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
+          AAPT="$BUILD_TOOLS_DIR/aapt"
+          APKSIGNER="$BUILD_TOOLS_DIR/apksigner"
+
+          # 1. Vérification du nom de package com.hira.kidas
+          PKG_NAME=$("$AAPT" dump badging "$APK_PATH" | grep -oP "package: name='\K[^']+")
+          if [ "$PKG_NAME" != "com.hira.kidas" ]; then
+            echo "::error::Package de l'APK invalide: '$PKG_NAME'. 'com.hira.kidas' est strictement requis."
+            exit 1
+          fi
+          echo "Validation réussie : Package = $PKG_NAME"
+
+          # 2. Vérification de la version injectée
+          APK_VNAME=$("$AAPT" dump badging "$APK_PATH" | grep -oP "versionName='\K[^']+")
+          EXPECTED_VNAME="${{ steps.versioning.outputs.version_name }}"
+          if [ "$APK_VNAME" != "$EXPECTED_VNAME" ]; then
+            echo "::error::VersionName de l'APK ($APK_VNAME) ne correspond pas à la version calculée ($EXPECTED_VNAME)."
+            exit 1
+          fi
+          echo "Validation réussie : VersionName = $APK_VNAME"
+
+          # 3. Vérification du flag debuggable
+          if "$AAPT" dump badging "$APK_PATH" | grep -q "application-debuggable"; then
+            echo "::error::L'APK de release ne doit PAS être debuggable."
+            exit 1
+          fi
+          echo "Validation réussie : APK non-debuggable"
+
+          # 4. Vérification de la signature APK
+          echo "Vérification de la signature avec apksigner..."
+          "$APKSIGNER" verify --verbose "$APK_PATH"
+          echo "Validation réussie : Signature APK valide."
+
+          # 5. Préparation du nom de fichier officiel pour l'updater HIRA
+          FINAL_APK_NAME="Hira-v${{ steps.versioning.outputs.version_name }}.apk"
+          cp "$APK_PATH" "$FINAL_APK_NAME"
+
+          # 6. Calcul de l'empreinte SHA-256
+          sha256sum "$FINAL_APK_NAME" > "${FINAL_APK_NAME}.sha256"
+          cat "${FINAL_APK_NAME}.sha256"
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ steps.versioning.outputs.tag_name }}
+          VERSION_NAME: ${{ steps.versioning.outputs.version_name }}
+        run: |
+          FINAL_APK="Hira-v${VERSION_NAME}.apk"
+          FINAL_SHA="${FINAL_APK}.sha256"
+
+          echo "Création de la release GitHub $TAG_NAME..."
+          gh release create "$TAG_NAME" \
+            "$FINAL_APK" \
+            "$FINAL_SHA" \
+            --title "HIRA v${VERSION_NAME}" \
+            --generate-notes \
+            --draft=false \
+            --prerelease=false
+
+          echo "Release GitHub publiée avec succès."
+
+      - name: Cleanup Keystore
+        if: always()
+        run: |
+          rm -f hira-release.jks
+          echo "Keystore temporaire supprimé du runner."

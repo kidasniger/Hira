@@ -1,0 +1,6 @@
+{
+  "name": "HIRA",
+  "description": "Application native HIRA - Messagerie rapide, sobre et accessible. Parlez simplement.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

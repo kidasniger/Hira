@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">HIRA</string>
+    <string name="splash_title">Hira</string>
+    <string name="splash_tagline">Parlez simplement.</string>
+</resources>
