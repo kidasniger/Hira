@@ -60,16 +60,22 @@ class MainActivity : ComponentActivity() {
                 val onboardingPreferences = remember { OnboardingPreferences(applicationContext) }
                 var currentRoute by rememberSaveable { mutableStateOf(HiraRoutes.SPLASH) }
 
+                // Données Google transmises à l'écran 7 pour préremplir le profil.
+                var profileDisplayName by rememberSaveable { mutableStateOf("") }
+                var profilePhotoUrl by rememberSaveable { mutableStateOf<String?>(null) }
+
                 // Écoute de l'événement de navigation après authentification réussie
                 // Consommé une seule fois grâce au Channel
                 LaunchedEffect(authViewModel) {
                     authViewModel.navigationEvent.collect { event ->
                         when (event) {
                             is AuthNavigationEvent.NavigateSuccess -> {
-                                currentRoute = if (event.isNewUser) {
-                                    HiraRoutes.CONFIG_PROFIL
+                                if (event.user.isNewUser) {
+                                    profileDisplayName = event.user.displayName.orEmpty()
+                                    profilePhotoUrl = event.user.photoUrl
+                                    currentRoute = HiraRoutes.CONFIG_PROFIL
                                 } else {
-                                    HiraRoutes.DISCUSSIONS
+                                    currentRoute = HiraRoutes.DISCUSSIONS
                                 }
                             }
                         }
@@ -179,6 +185,8 @@ class MainActivity : ComponentActivity() {
                             }
                             HiraRoutes.CONFIG_PROFIL -> {
                                 ProfileSetupScreen(
+                                    initialDisplayName = profileDisplayName,
+                                    initialPhotoUrl = profilePhotoUrl,
                                     onFinish = { _, _ ->
                                         // Écran 7 terminé -> écran 8 : permission des contacts
                                         currentRoute = HiraRoutes.PERMISSION_CONTACTS

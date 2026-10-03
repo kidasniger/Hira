@@ -4,6 +4,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.auth.AuthErrorMapper
+import com.example.data.auth.AuthUser
 import com.example.data.auth.AuthRepository
 import com.example.data.auth.AuthValidator
 import com.example.data.auth.GoogleNoAccountException
@@ -36,7 +37,7 @@ data class AuthUiState(
  * Événements uniques de navigation après authentification.
  */
 sealed interface AuthNavigationEvent {
-    data class NavigateSuccess(val isNewUser: Boolean) : AuthNavigationEvent
+    data class NavigateSuccess(val user: AuthUser) : AuthNavigationEvent
 }
 
 /**
@@ -81,7 +82,7 @@ class AuthViewModel(
 
             result.fold(
                 onSuccess = { user ->
-                    _navigationChannel.send(AuthNavigationEvent.NavigateSuccess(isNewUser = user.isNewUser))
+                    _navigationChannel.send(AuthNavigationEvent.NavigateSuccess(user = user))
                 },
                 onFailure = { error ->
                     val errorRes = AuthErrorMapper.fromThrowable(error)

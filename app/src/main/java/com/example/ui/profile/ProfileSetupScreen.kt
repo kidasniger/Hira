@@ -1,12 +1,11 @@
 package com.example.ui.profile
 
-import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
+import coil.compose.AsyncImage
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -41,7 +40,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,8 +50,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
@@ -89,38 +85,25 @@ import com.hira.kidas.R
  */
 @Composable
 fun ProfileSetupScreen(
+    initialDisplayName: String? = null,
+    initialPhotoUrl: String? = null,
     onFinish: (username: String, displayName: String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
-    var username by rememberSaveable { mutableStateOf("") }
-    var displayName by rememberSaveable { mutableStateOf("") }
-    var avatarUriString by rememberSaveable { mutableStateOf<String?>(null) }
-    var avatarBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
+    val googleDisplayName = initialDisplayName?.trim().orEmpty()
+    val suggestedUsername = suggestUsername(googleDisplayName)
+
+    // Pour un nouvel utilisateur Google, les champs sont préremplis dès l'ouverture.
+    // Pour un compte e-mail, les valeurs initiales restent vides.
+    var username by rememberSaveable { mutableStateOf(suggestedUsername) }
+    var displayName by rememberSaveable { mutableStateOf(googleDisplayName) }
+    var avatarUriString by rememberSaveable { mutableStateOf(initialPhotoUrl) }
 
     var usernameError by rememberSaveable { mutableStateOf<Int?>(null) }
     var displayNameError by rememberSaveable { mutableStateOf<Int?>(null) }
-
-    // Chargement de l'avatar local sélectionné par l'utilisateur
-    LaunchedEffect(avatarUriString) {
-        if (avatarUriString != null) {
-            try {
-                val uri = Uri.parse(avatarUriString)
-                val stream = context.contentResolver.openInputStream(uri)
-                val bitmap = BitmapFactory.decodeStream(stream)
-                stream?.close()
-                if (bitmap != null) {
-                    avatarBitmap = bitmap.asImageBitmap()
-                }
-            } catch (_: Exception) {
-                avatarBitmap = null
-            }
-        } else {
-            avatarBitmap = null
-        }
-    }
 
     // Sélecteur de média photo natif (sans permission requise)
     val photoPickerLauncher = rememberLauncherForActivityResult(
@@ -192,9 +175,9 @@ fun ProfileSetupScreen(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    if (avatarBitmap != null) {
-                        Image(
-                            bitmap = avatarBitmap!!,
+                    if (!avatarUriString.isNullOrBlank()) {
+                        AsyncImage(
+                            model = avatarUriString,
                             contentDescription = stringResource(id = R.string.profile_setup_avatar_description),
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop
@@ -456,4 +439,15 @@ private fun validateAndSubmit(
         val finalUsername = if (trimmedUser.startsWith("@")) trimmedUser else "@$trimmedUser"
         onSuccess(finalUsername, trimmedName)
     }
+}
+
+
+private fun suggestUsername(displayName: String): String {
+    val base = displayName
+        .lowercase()
+        .replace(Regex("[^a-z0-9]+"), "_")
+        .trim('_')
+        .take(24)
+
+    return if (base.isBlank()) "" else "@$base"
 }

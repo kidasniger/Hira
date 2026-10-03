@@ -44,7 +44,9 @@ class AuthRepository(
                 AuthUser(
                     uid = user.uid,
                     email = user.email,
-                    isNewUser = true
+                    isNewUser = true,
+                    displayName = user.displayName,
+                    photoUrl = user.photoUrl?.toString()
                 )
             )
         } catch (e: CancellationException) {
@@ -69,7 +71,9 @@ class AuthRepository(
                 AuthUser(
                     uid = user.uid,
                     email = user.email,
-                    isNewUser = false
+                    isNewUser = false,
+                    displayName = user.displayName,
+                    photoUrl = user.photoUrl?.toString()
                 )
             )
         } catch (e: CancellationException) {
@@ -96,7 +100,9 @@ class AuthRepository(
                 AuthUser(
                     uid = user.uid,
                     email = user.email,
-                    isNewUser = isNew
+                    isNewUser = isNew,
+                    displayName = user.displayName,
+                    photoUrl = user.photoUrl?.toString()
                 )
             )
         } catch (e: CancellationException) {
