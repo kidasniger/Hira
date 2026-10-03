@@ -59,6 +59,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.widthIn
 import com.example.ui.theme.HiraBorder
 import com.example.ui.theme.HiraGrayDark
 import com.example.ui.theme.HiraGrayMedium
