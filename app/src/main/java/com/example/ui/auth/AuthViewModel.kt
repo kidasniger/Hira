@@ -136,7 +136,7 @@ class AuthViewModel(
 
             result.fold(
                 onSuccess = { user ->
-                    _navigationChannel.send(AuthNavigationEvent.NavigateSuccess(isNewUser = user.isNewUser))
+                    _navigationChannel.send(AuthNavigationEvent.NavigateSuccess(user = user))
                 },
                 onFailure = { error ->
                     val errorRes = AuthErrorMapper.fromThrowable(error)
@@ -161,7 +161,7 @@ class AuthViewModel(
 
             result.fold(
                 onSuccess = { user ->
-                    _navigationChannel.send(AuthNavigationEvent.NavigateSuccess(isNewUser = user.isNewUser))
+                    _navigationChannel.send(AuthNavigationEvent.NavigateSuccess(user = user))
                 },
                 onFailure = { error ->
                     val errorRes = AuthErrorMapper.fromThrowable(error)
