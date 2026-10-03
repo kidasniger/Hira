@@ -27,6 +27,43 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Validate Google Services configuration
+        run: |
+          if [ ! -f "app/google-services.json" ]; then
+            echo "::error::app/google-services.json est absent du dépôt. La configuration Firebase officielle est obligatoire."
+            exit 1
+          fi
+
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          path = Path("app/google-services.json")
+          try:
+              data = json.loads(path.read_text(encoding="utf-8"))
+          except Exception as exc:
+              raise SystemExit(f"::error::google-services.json invalide: {exc}")
+
+          project_id = data.get("project_info", {}).get("project_id")
+          clients = data.get("client", [])
+          app_client = next(
+              (client for client in clients
+               if client.get("client_info", {}).get("android_client_info", {}).get("package_name") == "com.hira.kidas"),
+              None,
+          )
+
+          if project_id != "hira-app-chat":
+              raise SystemExit(f"::error::Projet Firebase inattendu: {project_id!r}")
+          if app_client is None:
+              raise SystemExit("::error::Aucune configuration Android pour com.hira.kidas dans google-services.json.")
+
+          app_id = app_client.get("client_info", {}).get("mobilesdk_app_id")
+          if app_id != "1:129923565999:android:1e69b2cd6b3ed8b2e4475a":
+              raise SystemExit(f"::error::Firebase Application ID inattendu: {app_id!r}")
+
+          print("Configuration Google Services validée pour hira-app-chat / com.hira.kidas.")
+          PY
+
       - name: Validate Signing Secrets
         id: check-secrets
         run: |

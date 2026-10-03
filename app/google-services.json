@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "129923565999",
+    "project_id": "hira-app-chat",
+    "storage_bucket": "hira-app-chat.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:129923565999:android:1e69b2cd6b3ed8b2e4475a",
+        "android_client_info": {
+          "package_name": "com.hira.kidas"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "129923565999-4qok1jkduej8f38ld2ii4nsp2k7fkt3f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAO8qEzAjd0-tLXcMLqrAJ3819ZXMboi2o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "129923565999-4qok1jkduej8f38ld2ii4nsp2k7fkt3f.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
