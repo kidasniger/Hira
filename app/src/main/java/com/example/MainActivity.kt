@@ -26,10 +26,10 @@ import com.example.navigation.HiraRoutes
 import com.example.ui.auth.AuthNavigationEvent
 import com.example.ui.auth.AuthViewModel
 import com.example.ui.auth.LoginScreen
-import com.example.ui.auth.PlaceholderSessionScreen
 import com.example.ui.auth.RegisterScreen
 import com.example.ui.contacts.ContactsPermissionScreen
 import com.example.ui.contacts.ContactsScreen
+import com.example.ui.chat.PrivateChatScreen
 import com.example.ui.discussions.DiscussionsScreen
 import com.example.ui.profile.ProfileSetupScreen
 import com.example.ui.onboarding.OnboardingScreen1
@@ -64,6 +64,7 @@ class MainActivity : ComponentActivity() {
                 // Données Google transmises à l'écran 7 pour préremplir le profil.
                 var profileDisplayName by rememberSaveable { mutableStateOf("") }
                 var profilePhotoUrl by rememberSaveable { mutableStateOf<String?>(null) }
+                var selectedChatContactName by rememberSaveable { mutableStateOf<String?>(null) }
 
                 // Écoute de l'événement de navigation après authentification réussie
                 // Consommé une seule fois grâce au Channel
@@ -170,7 +171,21 @@ class MainActivity : ComponentActivity() {
                                         // Le parcours de téléchargement HIRA sera ajouté sur un écran dédié ultérieurement.
                                     },
                                     onContactClick = {
-                                        // L'ouverture de la conversation privée sera branchée à l'écran 11.
+                                        // L'ouverture sera activée après vérification réelle du compte HIRA du contact.
+                                    }
+                                )
+                            }
+                            HiraRoutes.CHAT_PRIVE -> {
+                                PrivateChatScreen(
+                                    contactName = selectedChatContactName,
+                                    onBack = {
+                                        currentRoute = HiraRoutes.CONTACTS
+                                    },
+                                    onAttachmentClick = {
+                                        // L'écran 12 sera branché ici ultérieurement.
+                                    },
+                                    onSendMessage = {
+                                        // L'envoi réel sera branché au service de messagerie.
                                     }
                                 )
                             }
