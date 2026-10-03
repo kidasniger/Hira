@@ -50,7 +50,8 @@ import com.example.ui.theme.HiraWhite80
  */
 @Composable
 fun SplashScreen(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSplashFinished: () -> Unit = {}
 ) {
     // Animation d'apparition fluide et élégante à l'ouverture
     val logoAlpha = remember { Animatable(0f) }
@@ -75,6 +76,9 @@ fun SplashScreen(
             targetValue = 1f,
             animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)
         )
+        // Transition vers l'écran d'accueil après animation
+        kotlinx.coroutines.delay(1200L)
+        onSplashFinished()
     }
 
     Box(

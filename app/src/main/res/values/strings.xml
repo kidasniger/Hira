@@ -2,4 +2,11 @@
     <string name="app_name">HIRA</string>
     <string name="splash_title">Hira</string>
     <string name="splash_tagline">Parlez simplement.</string>
+
+    <!-- Onboarding 1/3 -->
+    <string name="onboarding_1_title">Une messagerie légère</string>
+    <string name="onboarding_1_tagline">Conçue pour consommer peu de données et fonctionner rapidement, même avec une faible connexion.</string>
+    <string name="onboarding_next">Suivant</string>
+    <string name="onboarding_skip">Passer</string>
+    <string name="onboarding_step_1_of_3">Écran 1 sur 3</string>
 </resources>

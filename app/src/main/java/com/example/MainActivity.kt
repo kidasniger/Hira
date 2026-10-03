@@ -3,15 +3,25 @@ package com.example
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.navigation.HiraRoutes
+import com.example.ui.onboarding.OnboardingScreen1
 import com.example.ui.splash.SplashScreen
 import com.example.ui.theme.HiraTheme
 import com.example.ui.update.UpdateBottomSheet
@@ -32,6 +42,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             HiraTheme {
                 val updateState by updateViewModel.updateState.collectAsStateWithLifecycle()
+                var currentRoute by rememberSaveable { mutableStateOf(HiraRoutes.SPLASH) }
 
                 // Vérification automatique au démarrage (avec throttling intégré)
                 LaunchedEffect(Unit) {
@@ -39,8 +50,47 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Box(modifier = Modifier.fillMaxSize()) {
-                    // Écran principal (Splash Screen pour cette première étape)
-                    SplashScreen()
+                    // Navigation fluide et légère adaptée à tous les téléphones
+                    AnimatedContent(
+                        targetState = currentRoute,
+                        transitionSpec = {
+                            fadeIn(animationSpec = androidx.compose.animation.core.tween(300)) togetherWith
+                                fadeOut(animationSpec = androidx.compose.animation.core.tween(200))
+                        },
+                        label = "hira_screen_transition"
+                    ) { route ->
+                        when (route) {
+                            HiraRoutes.SPLASH -> {
+                                SplashScreen(
+                                    onSplashFinished = {
+                                        // Transition normale vers Accueil 1/3
+                                        currentRoute = HiraRoutes.ACCUEIL_1
+                                    }
+                                )
+                            }
+                            HiraRoutes.ACCUEIL_1 -> {
+                                OnboardingScreen1(
+                                    onNextClick = {
+                                        // Cible de navigation vers Accueil 2/3
+                                        currentRoute = HiraRoutes.ACCUEIL_2
+                                    },
+                                    onSkipClick = {
+                                        currentRoute = HiraRoutes.ACCUEIL_2
+                                    },
+                                    onBack = {
+                                        // Sortie propre sans retour en boucle vers le Splash
+                                        finish()
+                                    }
+                                )
+                            }
+                            HiraRoutes.ACCUEIL_2 -> {
+                                // Route cible déclarée mais interface non implémentée selon les consignes strictes
+                                BackHandler {
+                                    currentRoute = HiraRoutes.ACCUEIL_1
+                                }
+                            }
+                        }
+                    }
 
                     // Interface modale de mise à jour globale superposée
                     UpdateBottomSheet(
