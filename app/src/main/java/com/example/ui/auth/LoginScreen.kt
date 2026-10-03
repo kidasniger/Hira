@@ -366,8 +366,23 @@ fun LoginScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp)
+                        .padding(top = 8.dp, bottom = if (uiState.debugErrorDetails.isNullOrBlank()) 8.dp else 2.dp)
                         .testTag("login_general_error")
+                )
+            }
+
+            // Détails de l'exception et code d'erreur affichés pour recopie
+            if (!uiState.debugErrorDetails.isNullOrBlank()) {
+                Text(
+                    text = uiState.debugErrorDetails,
+                    color = Color.Gray,
+                    fontSize = 11.sp,
+                    textAlign = TextAlign.Center,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                        .testTag("login_debug_error_details")
                 )
             }
 

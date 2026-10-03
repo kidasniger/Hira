@@ -8,6 +8,7 @@ import com.example.data.auth.AuthRepository
 import com.example.data.auth.AuthValidator
 import com.example.data.auth.GoogleNoAccountException
 import com.example.data.auth.GoogleSignInCancelledException
+import com.google.firebase.auth.FirebaseAuthException
 import com.hira.kidas.R
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +28,7 @@ data class AuthUiState(
     @StringRes val confirmPasswordError: Int? = null,
     @StringRes val cguError: Int? = null,
     @StringRes val generalError: Int? = null,
+    val debugErrorDetails: String? = null,
     @StringRes val infoMessage: Int? = null
 )
 
@@ -162,7 +164,20 @@ class AuthViewModel(
                 },
                 onFailure = { error ->
                     val errorRes = AuthErrorMapper.fromThrowable(error)
-                    _uiState.update { it.copy(generalError = errorRes) }
+                    val errorCode = (error as? FirebaseAuthException)?.errorCode
+                    val debugText = buildString {
+                        append(error.javaClass.name)
+                        if (errorCode != null) {
+                            append(" [errorCode: ")
+                            append(errorCode)
+                            append("]")
+                        }
+                        if (!error.message.isNullOrBlank()) {
+                            append(" - ")
+                            append(error.message)
+                        }
+                    }
+                    _uiState.update { it.copy(generalError = errorRes, debugErrorDetails = debugText) }
                 }
             )
         }
@@ -177,7 +192,23 @@ class AuthViewModel(
             is GoogleNoAccountException -> R.string.auth_error_google_no_account
             else -> AuthErrorMapper.fromThrowable(error)
         }
-        _uiState.update { it.copy(generalError = errorRes, isLoading = false) }
+        val errorCode = (error as? FirebaseAuthException)?.errorCode
+        val debugText = buildString {
+            append(error.javaClass.name)
+            if (errorCode != null) {
+                append(" [errorCode: $errorCode]")
+            }
+            if (!error.message.isNullOrBlank()) {
+                append(" - ${error.message}")
+            }
+        }
+        _uiState.update {
+            it.copy(
+                generalError = errorRes,
+                debugErrorDetails = debugText,
+                isLoading = false
+            )
+        }
     }
 
     /**
@@ -218,7 +249,8 @@ class AuthViewModel(
                 passwordError = null,
                 confirmPasswordError = null,
                 cguError = null,
-                generalError = null
+                generalError = null,
+                debugErrorDetails = null
             )
         }
     }

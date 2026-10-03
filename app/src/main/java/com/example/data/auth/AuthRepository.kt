@@ -1,8 +1,10 @@
 package com.example.data.auth
 
+import android.util.Log
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -85,6 +87,12 @@ class AuthRepository(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            val errorCode = (e as? FirebaseAuthException)?.errorCode
+            Log.e(
+                "AuthRepository",
+                "signInWithGoogle failed - Class: ${e.javaClass.name}, Message: ${e.message}, ErrorCode: $errorCode",
+                e
+            )
             Result.failure(e)
         }
     }
