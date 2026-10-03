@@ -113,8 +113,13 @@ jobs:
           echo "version_code=${NEW_VERSION_CODE}" >> $GITHUB_OUTPUT
           echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Make Gradle Wrapper Executable
-        run: chmod +x gradlew
+      - name: Ensure Gradle Wrapper
+        run: |
+          if [ ! -f gradlew ]; then
+            echo "gradlew absent du dépôt, génération automatique du wrapper Gradle..."
+            gradle wrapper
+          fi
+          chmod +x gradlew
 
       - name: Run Lint
         env:
