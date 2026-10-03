@@ -19,8 +19,8 @@ class GitHubUpdateService(
 ) {
     companion object {
         const val DEFAULT_GITHUB_API_URL = "https://api.github.com/repos/kidasniger/Hira/releases/latest"
-        private const val CONNECT_TIMEOUT_MS = 10000
-        private const val READ_TIMEOUT_MS = 15000
+        private const val CONNECT_TIMEOUT_MS = 8000
+        private const val READ_TIMEOUT_MS = 12000
     }
 
     /**
