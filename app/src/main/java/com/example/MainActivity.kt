@@ -4,7 +4,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,6 +43,7 @@ import com.example.ui.groups.GroupChatScreen
 import com.example.ui.groups.GroupContact
 import com.example.ui.groups.NewGroupScreen
 import com.example.ui.discussions.DiscussionsScreen
+import com.example.ui.profile.ProfileScreen
 import com.example.ui.profile.ProfileSetupScreen
 import com.example.ui.onboarding.OnboardingScreen1
 import com.example.ui.onboarding.OnboardingScreen2
@@ -70,10 +73,49 @@ class MainActivity : ComponentActivity() {
                 val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
                 val onboardingPreferences = remember { OnboardingPreferences(applicationContext) }
                 var currentRoute by rememberSaveable { mutableStateOf(HiraRoutes.SPLASH) }
+                var routeHistory by rememberSaveable { mutableStateOf(listOf(HiraRoutes.SPLASH)) }
+                var lastBackPressAt by rememberSaveable { mutableStateOf(0L) }
+
+                fun goTo(route: String) {
+                    if (route == currentRoute) return
+                    if (route == HiraRoutes.DISCUSSIONS) {
+                        routeHistory = listOf(HiraRoutes.DISCUSSIONS)
+                    } else if (routeHistory.lastOrNull() != route) {
+                        routeHistory = routeHistory + route
+                    }
+                    currentRoute = route
+                    lastBackPressAt = 0L
+                }
+
+                fun goBack() {
+                    if (routeHistory.size > 1) {
+                        val previousHistory = routeHistory.dropLast(1)
+                        routeHistory = previousHistory
+                        currentRoute = previousHistory.last()
+                        lastBackPressAt = 0L
+                        return
+                    }
+                    val now = System.currentTimeMillis()
+                    if (now - lastBackPressAt <= 1800L) {
+                        finish()
+                    } else {
+                        lastBackPressAt = now
+                        Toast.makeText(
+                            this@MainActivity,
+                            getString(com.hira.kidas.R.string.press_back_again_to_exit),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                BackHandler(enabled = true) {
+                    goBack()
+                }
 
                 // Données Google transmises à l'écran 7 pour préremplir le profil.
                 var profileDisplayName by rememberSaveable { mutableStateOf("") }
                 var profilePhotoUrl by rememberSaveable { mutableStateOf<String?>(null) }
+                var profileUsername by rememberSaveable { mutableStateOf<String?>(null) }
                 var selectedChatContactName by rememberSaveable { mutableStateOf<String?>(null) }
                 var selectedChatContactStatus by rememberSaveable { mutableStateOf<String?>(null) }
                 var selectedLargeFileUri by rememberSaveable { mutableStateOf<String?>(null) }
@@ -109,7 +151,7 @@ class MainActivity : ComponentActivity() {
                         selectedLargeFileName = metadata.name
                         selectedLargeFileSizeBytes = metadata.sizeBytes
                         selectedLargeFileMimeType = metadata.mimeType
-                        currentRoute = HiraRoutes.TELECHARGEMENT_FICHIER
+                        goTo(HiraRoutes.TELECHARGEMENT_FICHIER)
                     }
                 }
 
@@ -122,9 +164,9 @@ class MainActivity : ComponentActivity() {
                                 if (event.user.isNewUser) {
                                     profileDisplayName = event.user.displayName.orEmpty()
                                     profilePhotoUrl = event.user.photoUrl
-                                    currentRoute = HiraRoutes.CONFIG_PROFIL
+                                    goTo(HiraRoutes.CONFIG_PROFIL)
                                 } else {
-                                    currentRoute = HiraRoutes.DISCUSSIONS
+                                    goTo(HiraRoutes.DISCUSSIONS)
                                 }
                             }
                         }
@@ -149,26 +191,28 @@ class MainActivity : ComponentActivity() {
                             HiraRoutes.SPLASH -> {
                                 SplashScreen(
                                     onSplashFinished = {
-                                        currentRoute = when {
-                                            authRepository.isSignedIn() -> HiraRoutes.DISCUSSIONS
-                                            onboardingPreferences.isOnboardingCompleted() -> HiraRoutes.CONNEXION
-                                            else -> HiraRoutes.ACCUEIL_1
-                                        }
+                                        goTo(
+                                            when {
+                                                authRepository.isSignedIn() -> HiraRoutes.DISCUSSIONS
+                                                onboardingPreferences.isOnboardingCompleted() -> HiraRoutes.CONNEXION
+                                                else -> HiraRoutes.ACCUEIL_1
+                                            }
+                                        )
                                     }
                                 )
                             }
                             HiraRoutes.ACCUEIL_1 -> {
                                 OnboardingScreen1(
-                                    onNextClick = { currentRoute = HiraRoutes.ACCUEIL_2 },
-                                    onSkipClick = { currentRoute = HiraRoutes.ACCUEIL_3 },
-                                    onBack = { finish() }
+                                    onNextClick = { goTo(HiraRoutes.ACCUEIL_2) },
+                                    onSkipClick = { goTo(HiraRoutes.ACCUEIL_3) },
+                                    onBack = { goBack() }
                                 )
                             }
                             HiraRoutes.ACCUEIL_2 -> {
                                 OnboardingScreen2(
-                                    onNextClick = { currentRoute = HiraRoutes.ACCUEIL_3 },
-                                    onSkipClick = { currentRoute = HiraRoutes.ACCUEIL_3 },
-                                    onBackClick = { currentRoute = HiraRoutes.ACCUEIL_1 }
+                                    onNextClick = { goTo(HiraRoutes.ACCUEIL_3) },
+                                    onSkipClick = { goTo(HiraRoutes.ACCUEIL_3) },
+                                    onBackClick = { goTo(HiraRoutes.ACCUEIL_1) }
                                 )
                             }
                             HiraRoutes.ACCUEIL_3 -> {
@@ -176,9 +220,9 @@ class MainActivity : ComponentActivity() {
                                     onFinishClick = {
                                         onboardingPreferences.setOnboardingStep(3)
                                         onboardingPreferences.setOnboardingCompleted(true)
-                                        currentRoute = HiraRoutes.CONNEXION
+                                        goTo(HiraRoutes.CONNEXION)
                                     },
-                                    onBackClick = { currentRoute = HiraRoutes.ACCUEIL_2 }
+                                    onBackClick = { goTo(HiraRoutes.ACCUEIL_2) }
                                 )
                             }
                             HiraRoutes.CONNEXION -> {
@@ -187,7 +231,7 @@ class MainActivity : ComponentActivity() {
                                     uiState = authUiState,
                                     onNavigateToRegister = {
                                         authViewModel.clearErrors()
-                                        currentRoute = HiraRoutes.CREATION_COMPTE
+                                        goTo(HiraRoutes.CREATION_COMPTE)
                                     },
                                     onBack = { finish() }
                                 )
@@ -198,24 +242,27 @@ class MainActivity : ComponentActivity() {
                                     uiState = authUiState,
                                     onBackToLogin = {
                                         authViewModel.clearErrors()
-                                        currentRoute = HiraRoutes.CONNEXION
+                                        goTo(HiraRoutes.CONNEXION)
                                     }
                                 )
                             }
                             HiraRoutes.DISCUSSIONS -> {
                                 DiscussionsScreen(
                                     onContactsClick = {
-                                        currentRoute = HiraRoutes.CONTACTS
+                                        goTo(HiraRoutes.CONTACTS)
                                     },
                                     onGroupsClick = {
-                                        currentRoute = HiraRoutes.NOUVEAU_GROUPE
+                                        goTo(HiraRoutes.NOUVEAU_GROUPE)
                                     }
                                 )
                             }
                             HiraRoutes.CONTACTS -> {
                                 ContactsScreen(
                                     onDiscussionsClick = {
-                                        currentRoute = HiraRoutes.DISCUSSIONS
+                                        goTo(HiraRoutes.DISCUSSIONS)
+                                    },
+                                    onGroupsClick = {
+                                        goTo(HiraRoutes.NOUVEAU_GROUPE)
                                     },
                                     onInviteClick = {
                                         // Le parcours de téléchargement HIRA sera ajouté sur un écran dédié ultérieurement.
@@ -226,7 +273,7 @@ class MainActivity : ComponentActivity() {
                                     onDemoContactClick = {
                                         selectedChatContactName = getString(com.hira.kidas.R.string.contacts_demo_name)
                                         selectedChatContactStatus = getString(com.hira.kidas.R.string.contacts_demo_status)
-                                        currentRoute = HiraRoutes.CHAT_PRIVE
+                                        goTo(HiraRoutes.CHAT_PRIVE)
                                     }
                                 )
                             }
@@ -234,11 +281,9 @@ class MainActivity : ComponentActivity() {
                                 PrivateChatScreen(
                                     contactName = selectedChatContactName,
                                     contactStatus = selectedChatContactStatus,
-                                    onBack = {
-                                        currentRoute = HiraRoutes.CONTACTS
-                                    },
+                                    onBack = { goBack() },
                                     onAttachmentClick = {
-                                        currentRoute = HiraRoutes.PIECES_JOINTES
+                                        goTo(HiraRoutes.PIECES_JOINTES)
                                     },
                                     onSendMessage = {
                                         // L'envoi réel sera branché au service de messagerie.
@@ -249,9 +294,7 @@ class MainActivity : ComponentActivity() {
                                 AttachmentMenuScreen(
                                     contactName = selectedChatContactName,
                                     contactStatus = selectedChatContactStatus,
-                                    onBack = {
-                                        currentRoute = HiraRoutes.CHAT_PRIVE
-                                    },
+                                    onBack = { goBack() },
                                     onAttachmentAction = { action ->
                                         when (action) {
                                             AttachmentAction.VIDEO -> {
@@ -277,27 +320,23 @@ class MainActivity : ComponentActivity() {
                                     },
                                     fileSizeBytes = selectedLargeFileSizeBytes,
                                     mimeType = selectedLargeFileMimeType,
-                                    onBack = {
-                                        currentRoute = HiraRoutes.PIECES_JOINTES
-                                    },
+                                    onBack = { goBack() },
                                     onDownloadClick = {
                                         // Le téléchargement réel sera relié au moteur de transfert de fichiers.
                                     },
                                     onCancel = {
-                                        currentRoute = HiraRoutes.PIECES_JOINTES
+                                        goTo(HiraRoutes.PIECES_JOINTES)
                                     }
                                 )
                             }
                             HiraRoutes.NOUVEAU_GROUPE -> {
                                 NewGroupScreen(
                                     contacts = defaultGroupContacts,
-                                    onBack = {
-                                        currentRoute = HiraRoutes.DISCUSSIONS
-                                    },
+                                    onBack = { goBack() },
                                     onCreateGroup = { groupName, selectedContactIds ->
                                         selectedGroupName = groupName
                                         selectedGroupMemberCount = selectedContactIds.size + 1
-                                        currentRoute = HiraRoutes.CHAT_GROUPE
+                                        goTo(HiraRoutes.CHAT_GROUPE)
                                     }
                                 )
                             }
@@ -305,15 +344,25 @@ class MainActivity : ComponentActivity() {
                                 GroupChatScreen(
                                     groupName = selectedGroupName,
                                     memberCount = selectedGroupMemberCount,
-                                    onBack = {
-                                        currentRoute = HiraRoutes.NOUVEAU_GROUPE
-                                    },
+                                    onBack = { goBack() },
                                     onAttachmentClick = {
-                                        currentRoute = HiraRoutes.PIECES_JOINTES
+                                        goTo(HiraRoutes.PIECES_JOINTES)
                                     },
                                     onSendMessage = {
                                         // L'envoi réel sera branché au service de messagerie de groupe.
                                     }
+                                )
+                            }
+                            HiraRoutes.PROFIL -> {
+                                val firebaseUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+                                ProfileScreen(
+                                    displayName = profileDisplayName.ifBlank { firebaseUser?.displayName },
+                                    username = profileUsername,
+                                    email = firebaseUser?.email,
+                                    phoneNumber = firebaseUser?.phoneNumber,
+                                    photoUrl = profilePhotoUrl ?: firebaseUser?.photoUrl?.toString(),
+                                    memberSinceMillis = firebaseUser?.metadata?.creationTimestamp,
+                                    onBack = { goBack() }
                                 )
                             }
                             HiraRoutes.CONFIG_PROFIL -> {
@@ -321,17 +370,17 @@ class MainActivity : ComponentActivity() {
                                     initialDisplayName = profileDisplayName,
                                     initialPhotoUrl = profilePhotoUrl,
                                     onFinish = { _, _ ->
-                                        currentRoute = HiraRoutes.PERMISSION_CONTACTS
+                                        goTo(HiraRoutes.PERMISSION_CONTACTS)
                                     }
                                 )
                             }
                             HiraRoutes.PERMISSION_CONTACTS -> {
                                 ContactsPermissionScreen(
                                     onPermissionGranted = {
-                                        currentRoute = HiraRoutes.DISCUSSIONS
+                                        goTo(HiraRoutes.DISCUSSIONS)
                                     },
                                     onSkip = {
-                                        currentRoute = HiraRoutes.DISCUSSIONS
+                                        goTo(HiraRoutes.DISCUSSIONS)
                                     }
                                 )
                             }

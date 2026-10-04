@@ -74,6 +74,7 @@ private const val DEMO_CONTACT_ID = Long.MIN_VALUE
 @Composable
 fun ContactsScreen(
     onDiscussionsClick: () -> Unit = {},
+    onGroupsClick: () -> Unit = {},
     onInviteClick: () -> Unit = {},
     onContactClick: (String) -> Unit = {},
     onDemoContactClick: () -> Unit = {},
@@ -336,8 +337,10 @@ fun ContactsScreen(
             HiraBottomNavigation(
                 selected = HiraNavDestination.CONTACTS,
                 onDestinationClick = { destination ->
-                    if (destination == HiraNavDestination.DISCUSSIONS) {
-                        onDiscussionsClick()
+                    when (destination) {
+                        HiraNavDestination.DISCUSSIONS -> onDiscussionsClick()
+                        HiraNavDestination.GROUPES -> onGroupsClick()
+                        else -> Unit
                     }
                 },
                 modifier = Modifier.testTag("contacts_bottom_navigation")

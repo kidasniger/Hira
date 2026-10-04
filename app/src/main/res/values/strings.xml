@@ -150,4 +150,10 @@
     <string name="group_chat_attachment_description">Ajouter une pièce jointe</string>
     <string name="group_chat_send_description">Envoyer</string>
 
+    <string name="profile_title">Profil</string>
+    <string name="profile_unknown_name">Utilisateur HIRA</string>
+    <string name="profile_back_description">Retour</string>
+    <string name="profile_avatar_description">Photo de profil</string>
+    <string name="profile_edit">Modifier le profil</string>
+    <string name="press_back_again_to_exit">Appuyez encore une fois pour quitter</string>
 </resources>
