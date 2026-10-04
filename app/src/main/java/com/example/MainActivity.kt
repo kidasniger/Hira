@@ -205,7 +205,7 @@ class MainActivity : ComponentActivity() {
                                 OnboardingScreen1(
                                     onNextClick = { goTo(HiraRoutes.ACCUEIL_2) },
                                     onSkipClick = { goTo(HiraRoutes.ACCUEIL_3) },
-                                    onBack = { finish() }
+                                    onBack = { goBack() }
                                 )
                             }
                             HiraRoutes.ACCUEIL_2 -> {
