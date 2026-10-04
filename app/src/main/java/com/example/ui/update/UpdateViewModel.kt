@@ -42,6 +42,7 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
      */
     fun installUpdate(apkFile: File): Boolean {
         val context = getApplication<Application>().applicationContext
+        val updateInfo = (updateState.value as? UpdateDownloadState.ReadyToInstall)?.updateInfo
 
         if (!ApkInstaller.canRequestPackageInstalls(context)) {
             ApkInstaller.openInstallPermissionSettings(context)
@@ -49,6 +50,9 @@ class UpdateViewModel(application: Application) : AndroidViewModel(application) 
         }
 
         val result = ApkInstaller.installApk(context, apkFile)
+        if (result.isSuccess && updateInfo != null) {
+            repository.markInstalling(updateInfo)
+        }
         return result.isSuccess
     }
 

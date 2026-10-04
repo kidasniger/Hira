@@ -154,6 +154,10 @@ class UpdateRepository(
         }
     }
 
+    fun markInstalling(updateInfo: AppUpdateInfo) {
+        _updateState.value = UpdateDownloadState.Installing(updateInfo)
+    }
+
     fun dismissUpdate() {
         _updateState.value = UpdateDownloadState.Idle
     }
