@@ -4,7 +4,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,6 +43,7 @@ import com.example.ui.groups.GroupChatScreen
 import com.example.ui.groups.GroupContact
 import com.example.ui.groups.NewGroupScreen
 import com.example.ui.discussions.DiscussionsScreen
+import com.example.ui.profile.ProfileScreen
 import com.example.ui.profile.ProfileSetupScreen
 import com.example.ui.onboarding.OnboardingScreen1
 import com.example.ui.onboarding.OnboardingScreen2
@@ -70,10 +73,49 @@ class MainActivity : ComponentActivity() {
                 val authUiState by authViewModel.uiState.collectAsStateWithLifecycle()
                 val onboardingPreferences = remember { OnboardingPreferences(applicationContext) }
                 var currentRoute by rememberSaveable { mutableStateOf(HiraRoutes.SPLASH) }
+                var routeHistory by rememberSaveable { mutableStateOf(listOf(HiraRoutes.SPLASH)) }
+                var lastBackPressAt by rememberSaveable { mutableStateOf(0L) }
+
+                fun goTo(route: String) {
+                    if (route == currentRoute) return
+                    if (route == HiraRoutes.DISCUSSIONS) {
+                        routeHistory = listOf(HiraRoutes.DISCUSSIONS)
+                    } else if (routeHistory.lastOrNull() != route) {
+                        routeHistory = routeHistory + route
+                    }
+                    currentRoute = route
+                    lastBackPressAt = 0L
+                }
+
+                fun goBack() {
+                    if (routeHistory.size > 1) {
+                        val previousHistory = routeHistory.dropLast(1)
+                        routeHistory = previousHistory
+                        currentRoute = previousHistory.last()
+                        lastBackPressAt = 0L
+                        return
+                    }
+                    val now = System.currentTimeMillis()
+                    if (now - lastBackPressAt <= 1800L) {
+                        finish()
+                    } else {
+                        lastBackPressAt = now
+                        Toast.makeText(
+                            this@MainActivity,
+                            getString(com.hira.kidas.R.string.press_back_again_to_exit),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+
+                BackHandler(enabled = true) {
+                    goBack()
+                }
 
                 // Données Google transmises à l'écran 7 pour préremplir le profil.
                 var profileDisplayName by rememberSaveable { mutableStateOf("") }
                 var profilePhotoUrl by rememberSaveable { mutableStateOf<String?>(null) }
+                var profileUsername by rememberSaveable { mutableStateOf<String?>(null) }
                 var selectedChatContactName by rememberSaveable { mutableStateOf<String?>(null) }
                 var selectedChatContactStatus by rememberSaveable { mutableStateOf<String?>(null) }
                 var selectedLargeFileUri by rememberSaveable { mutableStateOf<String?>(null) }
