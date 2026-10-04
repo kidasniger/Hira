@@ -427,6 +427,18 @@ private fun ErrorContent(
 
 
 @Composable
+private fun HiraUpdateLogo() {
+    Box(
+        modifier = Modifier
+            .size(56.dp)
+            .background(HiraRoyalBlue, CircleShape),
+        contentAlignment = Alignment.Center
+    ) {
+        HiraLogo(size = 40.dp, isAnimated = false)
+    }
+}
+
+@Composable
 private fun InstallingContent() {
     HiraUpdateLogo()
 
