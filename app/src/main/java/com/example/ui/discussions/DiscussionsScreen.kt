@@ -53,6 +53,7 @@ import com.hira.kidas.R
 fun DiscussionsScreen(
     onSearchClick: () -> Unit = {},
     onContactsClick: () -> Unit = {},
+    onGroupsClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -123,8 +124,10 @@ fun DiscussionsScreen(
             HiraBottomNavigation(
                 selected = HiraNavDestination.DISCUSSIONS,
                 onDestinationClick = { destination ->
-                    if (destination == HiraNavDestination.CONTACTS) {
-                        onContactsClick()
+                    when (destination) {
+                        HiraNavDestination.CONTACTS -> onContactsClick()
+                        HiraNavDestination.GROUPES -> onGroupsClick()
+                        else -> Unit
                     }
                 },
                 modifier = Modifier.testTag("discussions_bottom_navigation")
