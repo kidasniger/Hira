@@ -261,6 +261,9 @@ class MainActivity : ComponentActivity() {
                                     onDiscussionsClick = {
                                         goTo(HiraRoutes.DISCUSSIONS)
                                     },
+                                    onGroupsClick = {
+                                        goTo(HiraRoutes.NOUVEAU_GROUPE)
+                                    },
                                     onInviteClick = {
                                         // Le parcours de téléchargement HIRA sera ajouté sur un écran dédié ultérieurement.
                                     },
