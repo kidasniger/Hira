@@ -28,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -104,7 +105,7 @@ fun UpdateBottomSheet(
                     DownloadingContent(state = state)
                 }
                 is UpdateDownloadState.Validating -> {
-                    ValidatingContent()
+                    ValidatingContent(updateInfo = state.updateInfo)
                 }
                 is UpdateDownloadState.ReadyToInstall -> {
                     ReadyToInstallContent(
@@ -220,14 +221,14 @@ private fun UpdatePromptContent(
                     .verticalScroll(rememberScrollState())
             ) {
                 Text(
-                    text = "Nouveautés :",
+                    text = "Ce qui a changé",
                     fontSize = 13.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = Color(0xFF111111)
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = updateInfo.releaseNotes,
+                    text = userSafeReleaseNotes(updateInfo.releaseNotes),
                     fontSize = 13.sp,
                     color = HiraGrayDark,
                     lineHeight = 18.sp
@@ -284,7 +285,7 @@ private fun UpdatePromptContent(
 @Composable
 private fun DownloadingContent(state: UpdateDownloadState.Downloading) {
     Text(
-        text = "Téléchargement en cours...",
+        text = "Mise à jour v${state.updateInfo.versionName} en cours",
         fontSize = 18.sp,
         fontWeight = FontWeight.Bold,
         color = Color(0xFF111111)
@@ -321,6 +322,10 @@ private fun DownloadingContent(state: UpdateDownloadState.Downloading) {
         )
     }
 
+    Spacer(modifier = Modifier.height(12.dp))
+
+    CompactUpdateSummary(text = userSafeReleaseNotes(state.updateInfo.releaseNotes))
+
     Spacer(modifier = Modifier.height(16.dp))
 
     Text(
@@ -332,9 +337,9 @@ private fun DownloadingContent(state: UpdateDownloadState.Downloading) {
 }
 
 @Composable
-private fun ValidatingContent() {
+private fun ValidatingContent(updateInfo: AppUpdateInfo) {
     Text(
-        text = "Vérification de sécurité de l'APK...",
+        text = "Vérification de la mise à jour v${updateInfo.versionName}...",
         fontSize = 16.sp,
         fontWeight = FontWeight.SemiBold,
         color = Color(0xFF111111)
@@ -349,10 +354,13 @@ private fun ValidatingContent() {
     )
     Spacer(modifier = Modifier.height(8.dp))
     Text(
-        text = "Contrôle de l'intégrité, du package et de la signature...",
+        text = "Contrôle de l'intégrité et de la signature de l'APK...",
         fontSize = 12.sp,
-        color = HiraGrayMedium
+        color = HiraGrayMedium,
+        textAlign = TextAlign.Center
     )
+    Spacer(modifier = Modifier.height(12.dp))
+    CompactUpdateSummary(text = userSafeReleaseNotes(updateInfo.releaseNotes))
 }
 
 @Composable
@@ -381,6 +389,10 @@ private fun ReadyToInstallContent(
         color = HiraGrayDark,
         textAlign = TextAlign.Center
     )
+
+    Spacer(modifier = Modifier.height(12.dp))
+
+    CompactUpdateSummary(text = userSafeReleaseNotes(updateInfo.releaseNotes))
 
     Spacer(modifier = Modifier.height(16.dp))
 
@@ -491,4 +503,58 @@ private fun ErrorContent(
     ) {
         Text("Fermer", color = HiraWhite, fontWeight = FontWeight.SemiBold)
     }
+}
+
+
+@Composable
+private fun CompactUpdateSummary(text: String) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = HiraGrayLight
+    ) {
+        Text(
+            text = text,
+            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+            fontSize = 12.sp,
+            color = HiraGrayDark,
+            lineHeight = 17.sp
+        )
+    }
+}
+
+private fun userSafeReleaseNotes(rawNotes: String): String {
+    val lines = rawNotes
+        .lineSequence()
+        .map { it.trim() }
+        .filter { it.isNotBlank() }
+        .filterNot { it.startsWith("#") }
+        .filterNot { it.contains("What's Changed", ignoreCase = true) }
+        .filterNot { it.contains("Full Changelog", ignoreCase = true) }
+        .map { line ->
+            line
+                .replace(Regex("""https?://\S+"""), "")
+                .replace(Regex("""\[([^]]+)]\([^)]*\)"""), "$1")
+                .replace(Regex("""\*\*([^*]+)\*\*"""), "$1")
+                .removePrefix("*")
+                .removePrefix("-")
+                .trim()
+                .replace(Regex("""\s+by\s+@\S+\s+in\s*$"""), "")
+                .replace(
+                    Regex("""^Implement screen\s+(\d+)\s*:\s*(.+)$""", RegexOption.IGNORE_CASE),
+                    "Écran $1 : $2"
+                )
+                .trim()
+        }
+        .filter { it.isNotBlank() }
+        .distinct()
+        .take(3)
+        .toList()
+
+    if (lines.isEmpty()) {
+        return "Améliorations et corrections incluses dans cette mise à jour."
+    }
+
+    return lines.joinToString(prefix = "• ", separator = "
+• ")
 }
