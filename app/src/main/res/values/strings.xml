@@ -140,4 +140,14 @@
     <string name="new_group_no_contacts">Aucun membre HIRA disponible.</string>
     <string name="new_group_create">Créer le groupe</string>
 
+
+    <!-- Écran 15 — Discussion de groupe -->
+    <string name="group_chat_default_name">Groupe HIRA</string>
+    <string name="group_chat_member_count">%1$d membres</string>
+    <string name="group_chat_empty">Aucun message pour le moment</string>
+    <string name="group_chat_back_description">Retour</string>
+    <string name="group_chat_more_description">Options du groupe</string>
+    <string name="group_chat_attachment_description">Ajouter une pièce jointe</string>
+    <string name="group_chat_send_description">Envoyer</string>
+
 </resources>
