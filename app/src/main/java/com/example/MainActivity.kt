@@ -37,6 +37,8 @@ import com.example.ui.chat.AttachmentMenuScreen
 import com.example.ui.chat.LargeFileDownloadScreen
 import com.example.ui.chat.AttachmentAction
 import com.example.ui.chat.PrivateChatScreen
+import com.example.ui.groups.GroupContact
+import com.example.ui.groups.NewGroupScreen
 import com.example.ui.discussions.DiscussionsScreen
 import com.example.ui.profile.ProfileSetupScreen
 import com.example.ui.onboarding.OnboardingScreen1
@@ -77,6 +79,16 @@ class MainActivity : ComponentActivity() {
                 var selectedLargeFileName by rememberSaveable { mutableStateOf<String?>(null) }
                 var selectedLargeFileSizeBytes by rememberSaveable { mutableStateOf<Long?>(null) }
                 var selectedLargeFileMimeType by rememberSaveable { mutableStateOf<String?>(null) }
+
+                val defaultGroupContacts = remember {
+                    listOf(
+                        GroupContact(
+                            id = "demo-hira-user",
+                            displayName = getString(com.hira.kidas.R.string.contacts_demo_name),
+                            initials = "HI"
+                        )
+                    )
+                }
 
                 val attachmentPicker = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.OpenDocument()
@@ -191,6 +203,9 @@ class MainActivity : ComponentActivity() {
                                 DiscussionsScreen(
                                     onContactsClick = {
                                         currentRoute = HiraRoutes.CONTACTS
+                                    },
+                                    onGroupsClick = {
+                                        currentRoute = HiraRoutes.NOUVEAU_GROUPE
                                     }
                                 )
                             }
@@ -267,6 +282,17 @@ class MainActivity : ComponentActivity() {
                                     },
                                     onCancel = {
                                         currentRoute = HiraRoutes.PIECES_JOINTES
+                                    }
+                                )
+                            }
+                            HiraRoutes.NOUVEAU_GROUPE -> {
+                                NewGroupScreen(
+                                    contacts = defaultGroupContacts,
+                                    onBack = {
+                                        currentRoute = HiraRoutes.DISCUSSIONS
+                                    },
+                                    onCreateGroup = { _, _ ->
+                                        // L'écran 15 sera branché lorsque la discussion de groupe sera implémentée.
                                     }
                                 )
                             }
