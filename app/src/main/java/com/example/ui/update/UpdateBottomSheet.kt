@@ -554,6 +554,5 @@ private fun userSafeReleaseNotes(rawNotes: String): String {
         return "Améliorations et corrections incluses dans cette mise à jour."
     }
 
-    return lines.joinToString(prefix = "• ", separator = "
-• ")
+    return lines.joinToString(prefix = "• ", separator = "\n• ")
 }
