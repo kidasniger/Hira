@@ -589,6 +589,16 @@ private fun translateReleaseChange(value: String): List<String> {
         }
 
     return when {
+        text.contains("Show versions size and detailed French update notes", ignoreCase = true) ->
+            listOf(
+                "Mise à jour : réaffichage clair des versions actuelle et nouvelle ainsi que de la taille de l'APK.",
+                "Informations détaillées : les changements sont présentés en français dans la section « Ce qui a été fait », sans liens GitHub ni contenu technique inutile."
+            )
+        text.contains("Implement screen 16 and improve navigation history", ignoreCase = true) ->
+            listOf(
+                "Écran 16 : ajout du profil utilisateur avec affichage des informations réelles du compte, notamment le nom, la photo, l'adresse e-mail, le numéro de téléphone et la date d'inscription.",
+                "Navigation : ajout du retour vers l'écran précédent et de la fermeture de HIRA après deux pressions rapides sur le bouton Retour depuis l'écran racine."
+            )
         text.startsWith("Security:", ignoreCase = true) ->
             listOf("Sécurité : " + text.substringAfter(":").trim())
         text.startsWith("Fix ", ignoreCase = true) ->
