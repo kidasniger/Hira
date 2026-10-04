@@ -203,16 +203,16 @@ class MainActivity : ComponentActivity() {
                             }
                             HiraRoutes.ACCUEIL_1 -> {
                                 OnboardingScreen1(
-                                    onNextClick = { goTo(HiraRoutes.ACCUEIL_)2 },
-                                    onSkipClick = { goTo(HiraRoutes.ACCUEIL_)3 },
+                                    onNextClick = { goTo(HiraRoutes.ACCUEIL_2 },
+                                    onSkipClick = { goTo(HiraRoutes.ACCUEIL_3 },
                                     onBack = { finish() }
                                 )
                             }
                             HiraRoutes.ACCUEIL_2 -> {
                                 OnboardingScreen2(
-                                    onNextClick = { goTo(HiraRoutes.ACCUEIL_)3 },
-                                    onSkipClick = { goTo(HiraRoutes.ACCUEIL_)3 },
-                                    onBackClick = { goTo(HiraRoutes.ACCUEIL_)1 }
+                                    onNextClick = { goTo(HiraRoutes.ACCUEIL_3 },
+                                    onSkipClick = { goTo(HiraRoutes.ACCUEIL_3 },
+                                    onBackClick = { goTo(HiraRoutes.ACCUEIL_1 }
                                 )
                             }
                             HiraRoutes.ACCUEIL_3 -> {
@@ -222,7 +222,7 @@ class MainActivity : ComponentActivity() {
                                         onboardingPreferences.setOnboardingCompleted(true)
                                         goTo(HiraRoutes.CONNEXION)
                                     },
-                                    onBackClick = { goTo(HiraRoutes.ACCUEIL_)2 }
+                                    onBackClick = { goTo(HiraRoutes.ACCUEIL_2 }
                                 )
                             }
                             HiraRoutes.CONNEXION -> {
@@ -291,9 +291,7 @@ class MainActivity : ComponentActivity() {
                                 AttachmentMenuScreen(
                                     contactName = selectedChatContactName,
                                     contactStatus = selectedChatContactStatus,
-                                    onBack = {
-                                        goTo(HiraRoutes.CHAT_PRIVE)
-                                    },
+                                    onBack = { goBack() },
                                     onAttachmentAction = { action ->
                                         when (action) {
                                             AttachmentAction.VIDEO -> {
@@ -331,9 +329,7 @@ class MainActivity : ComponentActivity() {
                             HiraRoutes.NOUVEAU_GROUPE -> {
                                 NewGroupScreen(
                                     contacts = defaultGroupContacts,
-                                    onBack = {
-                                        goTo(HiraRoutes.DISCUSSIONS)
-                                    },
+                                    onBack = { goBack() },
                                     onCreateGroup = { groupName, selectedContactIds ->
                                         selectedGroupName = groupName
                                         selectedGroupMemberCount = selectedContactIds.size + 1
