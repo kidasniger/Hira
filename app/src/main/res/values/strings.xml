@@ -129,4 +129,15 @@
     <string name="large_file_downloading">Téléchargement… %1$d%%</string>
     <string name="large_file_cancel">Annuler</string>
     <string name="large_file_downloaded">Téléchargement terminé</string>
+
+    <!-- Écran 14 — Nouveau groupe -->
+    <string name="new_group_title">Nouveau groupe</string>
+    <string name="new_group_step">1/2</string>
+    <string name="new_group_back_description">Retour</string>
+    <string name="new_group_photo_description">Ajouter une photo au groupe</string>
+    <string name="new_group_name_hint">Nom du groupe</string>
+    <string name="new_group_select_members">Sélectionner les membres (%1$d)</string>
+    <string name="new_group_no_contacts">Aucun membre HIRA disponible.</string>
+    <string name="new_group_create">Créer le groupe</string>
+
 </resources>
