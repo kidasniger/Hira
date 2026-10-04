@@ -105,17 +105,13 @@ fun UpdateBottomSheet(
                 }
                 is UpdateDownloadState.ReadyToInstall -> {
                     ReadyToInstallContent(
-                        updateInfo = state.updateInfo,
-                        apkFile = state.apkFile,
                         onInstallClick = { onInstallClick(state.apkFile) },
-                        onRequestPermission = onRequestPermission,
-                        onDismiss = onDismiss
+                        onRequestPermission = onRequestPermission
                     )
                 }
                 is UpdateDownloadState.Error -> {
                     ErrorContent(
                         message = state.message,
-                        canRetry = state.canRetry,
                         onDismiss = onDismiss
                     )
                 }
@@ -225,7 +221,7 @@ private fun UpdatePromptContent(
 @Composable
 private fun DownloadingContent(state: UpdateDownloadState.Downloading) {
     Text(
-        text = "Mise à jour v${state.updateInfo.versionName} en cours",
+        text = "Téléchargement de la mise à jour",
         fontSize = 18.sp,
         fontWeight = FontWeight.Bold,
         color = Color(0xFF111111)
@@ -247,7 +243,7 @@ private fun DownloadingContent(state: UpdateDownloadState.Downloading) {
 
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween
     ) {
         Text(
             text = "${state.progressPercent}%",
@@ -264,9 +260,7 @@ private fun DownloadingContent(state: UpdateDownloadState.Downloading) {
 
     Spacer(modifier = Modifier.height(12.dp))
 
-    CompactUpdateSummary(text = userSafeReleaseNotes(state.updateInfo.releaseNotes))
 
-    Spacer(modifier = Modifier.height(16.dp))
 
     Text(
         text = "Le téléchargement se poursuit en arrière-plan.",
@@ -279,7 +273,7 @@ private fun DownloadingContent(state: UpdateDownloadState.Downloading) {
 @Composable
 private fun ValidatingContent(updateInfo: AppUpdateInfo) {
     Text(
-        text = "Vérification de la mise à jour v${updateInfo.versionName}...",
+        text = "Vérification de la mise à jour",
         fontSize = 16.sp,
         fontWeight = FontWeight.SemiBold,
         color = Color(0xFF111111)
@@ -299,17 +293,12 @@ private fun ValidatingContent(updateInfo: AppUpdateInfo) {
         color = HiraGrayMedium,
         textAlign = TextAlign.Center
     )
-    Spacer(modifier = Modifier.height(12.dp))
-    CompactUpdateSummary(text = userSafeReleaseNotes(updateInfo.releaseNotes))
 }
 
 @Composable
 private fun ReadyToInstallContent(
-    updateInfo: AppUpdateInfo,
-    apkFile: java.io.File,
     onInstallClick: () -> Unit,
-    onRequestPermission: () -> Unit,
-    onDismiss: () -> Unit
+    onRequestPermission: () -> Unit
 ) {
     val context = LocalContext.current
     val hasInstallPermission = ApkInstaller.canRequestPackageInstalls(context)
@@ -323,18 +312,7 @@ private fun ReadyToInstallContent(
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    Text(
-        text = "La version v${updateInfo.versionName} a été vérifiée et est prête à être installée.",
-        fontSize = 14.sp,
-        color = HiraGrayDark,
-        textAlign = TextAlign.Center
-    )
-
-    Spacer(modifier = Modifier.height(12.dp))
-
-    CompactUpdateSummary(text = userSafeReleaseNotes(updateInfo.releaseNotes))
-
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(20.dp))
 
     // Si Android 8.0+ exige l'autorisation de source inconnue
     if (!hasInstallPermission) {
@@ -412,7 +390,6 @@ private fun ReadyToInstallContent(
 @Composable
 private fun ErrorContent(
     message: String,
-    canRetry: Boolean,
     onDismiss: () -> Unit
 ) {
     Text(
