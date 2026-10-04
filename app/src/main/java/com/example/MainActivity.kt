@@ -203,16 +203,16 @@ class MainActivity : ComponentActivity() {
                             }
                             HiraRoutes.ACCUEIL_1 -> {
                                 OnboardingScreen1(
-                                    onNextClick = { goTo(HiraRoutes.ACCUEIL_2 },
-                                    onSkipClick = { goTo(HiraRoutes.ACCUEIL_3 },
+                                    onNextClick = { goTo(HiraRoutes.ACCUEIL_2) },
+                                    onSkipClick = { goTo(HiraRoutes.ACCUEIL_3) },
                                     onBack = { finish() }
                                 )
                             }
                             HiraRoutes.ACCUEIL_2 -> {
                                 OnboardingScreen2(
-                                    onNextClick = { goTo(HiraRoutes.ACCUEIL_3 },
-                                    onSkipClick = { goTo(HiraRoutes.ACCUEIL_3 },
-                                    onBackClick = { goTo(HiraRoutes.ACCUEIL_1 }
+                                    onNextClick = { goTo(HiraRoutes.ACCUEIL_3) },
+                                    onSkipClick = { goTo(HiraRoutes.ACCUEIL_3) },
+                                    onBackClick = { goTo(HiraRoutes.ACCUEIL_1) }
                                 )
                             }
                             HiraRoutes.ACCUEIL_3 -> {
@@ -222,7 +222,7 @@ class MainActivity : ComponentActivity() {
                                         onboardingPreferences.setOnboardingCompleted(true)
                                         goTo(HiraRoutes.CONNEXION)
                                     },
-                                    onBackClick = { goTo(HiraRoutes.ACCUEIL_2 }
+                                    onBackClick = { goTo(HiraRoutes.ACCUEIL_2) }
                                 )
                             }
                             HiraRoutes.CONNEXION -> {
