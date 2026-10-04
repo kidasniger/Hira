@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hira.kidas.BuildConfig
 import com.example.data.model.AppUpdateInfo
 import com.example.data.model.UpdateDownloadState
 import com.example.ui.components.HiraLogo
@@ -149,9 +150,67 @@ private fun UpdatePromptContent(
         textAlign = TextAlign.Center
     )
 
-    Spacer(modifier = Modifier.height(8.dp))
-
     Spacer(modifier = Modifier.height(20.dp))
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = HiraGrayLight
+        ) {
+            Text(
+                text = "Actuelle : v" + BuildConfig.VERSION_NAME,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                color = HiraGrayDark,
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Text(
+            text = "→",
+            color = HiraGrayMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        Surface(
+            shape = RoundedCornerShape(8.dp),
+            color = Color(0xFFE6EBFF)
+        ) {
+            Text(
+                text = "Nouvelle : v" + updateInfo.versionName,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = HiraRoyalBlue,
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+            )
+        }
+    }
+
+    Spacer(modifier = Modifier.height(10.dp))
+
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(8.dp),
+        color = HiraGrayLight
+    ) {
+        Text(
+            text = "Taille : " + updateInfo.formattedSize,
+            fontSize = 12.sp,
+            color = HiraGrayDark,
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            textAlign = TextAlign.Center
+        )
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
 
     androidx.compose.material3.Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -473,6 +532,7 @@ private fun InstallingContent() {
     )
 }
 
+
 private fun userSafeReleaseNotes(rawNotes: String): String {
     val cleaned = rawNotes
         .lineSequence()
@@ -486,14 +546,15 @@ private fun userSafeReleaseNotes(rawNotes: String): String {
                 .replace(Regex("https?://\\S+"), "")
                 .replace(Regex("\\[([^]]+)\\]\\([^)]*\\)"), "$1")
                 .replace(Regex("\\*\\*([^*]+)\\*\\*"), "$1")
+                .replace(Regex("\\s+by\\s+@\\S+.*$"), "")
                 .removePrefix("*")
                 .removePrefix("-")
                 .trim()
         }
         .filter { it.isNotBlank() }
-        .map(::translateReleaseChange)
+        .flatMap { translateReleaseChange(it) }
         .distinct()
-        .take(5)
+        .take(6)
         .toList()
 
     return if (cleaned.isEmpty()) {
@@ -503,24 +564,47 @@ private fun userSafeReleaseNotes(rawNotes: String): String {
     }
 }
 
-private fun translateReleaseChange(value: String): String {
+private fun translateReleaseChange(value: String): List<String> {
     val text = value.trim()
-    val match = Regex("Implement screen\\s+(\\d+)\\s*(?::|and)\\s*(.+)$", RegexOption.IGNORE_CASE).find(text)
 
-    if (match != null) {
-        return when (match.groupValues[1]) {
-            "14" -> "Écran 14 : création de groupe"
-            "15" -> "Écran 15 : discussion de groupe"
-            "16" -> "Écran 16 : profil utilisateur et navigation"
-            else -> "Écran " + match.groupValues[1] + " : " + match.groupValues[2]
+    Regex("""Implement screen\s+(\d+)\s*(?::|and)\s*(.+)$""", RegexOption.IGNORE_CASE)
+        .find(text)
+        ?.let { match ->
+            return when (match.groupValues[1]) {
+                "13" -> listOf(
+                    "Écran 13 : ajout du téléchargement de gros fichiers avec sélection réelle de vidéos et de documents, suivi de la progression et validation du fichier d'installation."
+                )
+                "14" -> listOf(
+                    "Écran 14 : ajout de la création de groupe avec nom du groupe, emplacement pour la photo et sélection des membres."
+                )
+                "15" -> listOf(
+                    "Écran 15 : ajout de la discussion de groupe avec affichage du groupe, zone de messages, pièces jointes et saisie de texte."
+                )
+                "16" -> listOf(
+                    "Écran 16 : ajout du profil utilisateur avec affichage des informations réelles du compte, notamment le nom, la photo, l'adresse e-mail, le numéro de téléphone et la date d'inscription.",
+                    "Navigation : amélioration du retour vers l'écran précédent et ajout de la fermeture de HIRA après deux pressions rapides sur le bouton Retour depuis l'écran racine."
+                )
+                else -> listOf("Écran " + match.groupValues[1] + " : " + match.groupValues[2])
+            }
         }
-    }
 
     return when {
+        text.contains("Show versions size and detailed French update notes", ignoreCase = true) ->
+            listOf(
+                "Mise à jour : réaffichage clair des versions actuelle et nouvelle ainsi que de la taille de l'APK.",
+                "Informations détaillées : les changements sont présentés en français dans la section « Ce qui a été fait », sans liens GitHub ni contenu technique inutile."
+            )
+        text.contains("Implement screen 16 and improve navigation history", ignoreCase = true) ->
+            listOf(
+                "Écran 16 : ajout du profil utilisateur avec affichage des informations réelles du compte, notamment le nom, la photo, l'adresse e-mail, le numéro de téléphone et la date d'inscription.",
+                "Navigation : ajout du retour vers l'écran précédent et de la fermeture de HIRA après deux pressions rapides sur le bouton Retour depuis l'écran racine."
+            )
         text.startsWith("Security:", ignoreCase = true) ->
-            "Sécurité : " + text.substringAfter(":").trim()
+            listOf("Sécurité : " + text.substringAfter(":").trim())
         text.startsWith("Fix ", ignoreCase = true) ->
-            "Correction : " + text.removePrefix("Fix ").trim()
-        else -> text
+            listOf("Correction : " + text.removePrefix("Fix ").trim())
+        text.startsWith("Add ", ignoreCase = true) ->
+            listOf("Amélioration : " + text.removePrefix("Add ").trim())
+        else -> listOf(text)
     }
 }
