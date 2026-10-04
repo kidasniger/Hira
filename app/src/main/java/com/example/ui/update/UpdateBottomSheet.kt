@@ -2,21 +2,17 @@ package com.example.ui.update
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,7 +20,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SheetState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -37,7 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hira.kidas.BuildConfig
 import com.example.data.model.AppUpdateInfo
 import com.example.data.model.UpdateDownloadState
 import com.example.ui.components.HiraLogo
@@ -106,6 +100,9 @@ fun UpdateBottomSheet(
                 is UpdateDownloadState.Validating -> {
                     ValidatingContent(updateInfo = state.updateInfo)
                 }
+                is UpdateDownloadState.Installing -> {
+                    InstallingContent()
+                }
                 is UpdateDownloadState.ReadyToInstall -> {
                     ReadyToInstallContent(
                         updateInfo = state.updateInfo,
@@ -156,83 +153,27 @@ private fun UpdatePromptContent(
 
     Spacer(modifier = Modifier.height(8.dp))
 
-    // Badges de versions
-    Row(
+    Spacer(modifier = Modifier.height(20.dp))
+
+    androidx.compose.material3.Surface(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+        shape = RoundedCornerShape(12.dp),
+        color = HiraGrayLight
     ) {
-        Surface(
-            shape = RoundedCornerShape(8.dp),
-            color = HiraGrayLight
-        ) {
+        Column(modifier = Modifier.padding(14.dp)) {
             Text(
-                text = "Actuelle: v${BuildConfig.VERSION_NAME}",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
+                text = "Ce qui a été fait",
+                fontSize = 13.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Color(0xFF111111)
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = userSafeReleaseNotes(updateInfo.releaseNotes),
+                fontSize = 13.sp,
                 color = HiraGrayDark,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                lineHeight = 18.sp
             )
-        }
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Text(text = "→", color = HiraGrayMedium, fontWeight = FontWeight.Bold)
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Surface(
-            shape = RoundedCornerShape(8.dp),
-            color = Color(0xFFE6EBFF)
-        ) {
-            Text(
-                text = "Nouvelle: v${updateInfo.versionName}",
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
-                color = HiraRoyalBlue,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-            )
-        }
-    }
-
-    Spacer(modifier = Modifier.height(12.dp))
-
-    Text(
-        text = "Taille : ${updateInfo.formattedSize}",
-        fontSize = 13.sp,
-        color = HiraGrayMedium
-    )
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    // Notes de version déroulables
-    if (updateInfo.releaseNotes.isNotBlank()) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(max = 160.dp),
-            shape = RoundedCornerShape(12.dp),
-            color = HiraGrayLight
-        ) {
-            Column(
-                modifier = Modifier
-                    .padding(14.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                Text(
-                    text = "Ce qui a changé",
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF111111)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = userSafeReleaseNotes(updateInfo.releaseNotes),
-                    fontSize = 13.sp,
-                    color = HiraGrayDark,
-                    lineHeight = 18.sp
-                )
-            }
         }
     }
 
@@ -241,7 +182,7 @@ private fun UpdatePromptContent(
     // Boutons d'action
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(12.dp)
     ) {
         OutlinedButton(
             onClick = onDismiss,
@@ -506,24 +447,42 @@ private fun ErrorContent(
 
 
 @Composable
-private fun CompactUpdateSummary(text: String) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        color = HiraGrayLight
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-            fontSize = 12.sp,
-            color = HiraGrayDark,
-            lineHeight = 17.sp
-        )
-    }
+private fun InstallingContent() {
+    HiraUpdateLogo()
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    Text(
+        text = "Installation de la mise à jour en cours",
+        fontSize = 18.sp,
+        fontWeight = FontWeight.Bold,
+        color = Color(0xFF111111),
+        textAlign = TextAlign.Center
+    )
+
+    Spacer(modifier = Modifier.height(18.dp))
+
+    LinearProgressIndicator(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(6.dp)
+            .testTag("update_install_progress"),
+        color = HiraRoyalBlue,
+        trackColor = Color(0xFFE5E7EB)
+    )
+
+    Spacer(modifier = Modifier.height(10.dp))
+
+    Text(
+        text = "HIRA applique la mise à jour.",
+        fontSize = 12.sp,
+        color = HiraGrayMedium,
+        textAlign = TextAlign.Center
+    )
 }
 
 private fun userSafeReleaseNotes(rawNotes: String): String {
-    val lines = rawNotes
+    val cleaned = rawNotes
         .lineSequence()
         .map { it.trim() }
         .filter { it.isNotBlank() }
@@ -532,27 +491,44 @@ private fun userSafeReleaseNotes(rawNotes: String): String {
         .filterNot { it.contains("Full Changelog", ignoreCase = true) }
         .map { line ->
             line
-                .replace(Regex("""https?://\S+"""), "")
-                .replace(Regex("""\[([^]]+)]\([^)]*\)"""), "$1")
-                .replace(Regex("""\*\*([^*]+)\*\*"""), "$1")
+                .replace(Regex("https?://\\S+"), "")
+                .replace(Regex("\\[([^]]+)\\]\\([^)]*\\)"), "$1")
+                .replace(Regex("\\*\\*([^*]+)\\*\\*"), "$1")
                 .removePrefix("*")
                 .removePrefix("-")
                 .trim()
-                .replace(Regex("""\s+by\s+@\S+\s+in\s*$"""), "")
-                .replace(
-                    Regex("""^Implement screen\s+(\d+)\s*:\s*(.+)$""", RegexOption.IGNORE_CASE),
-                    "Écran $1 : $2"
-                )
-                .trim()
         }
         .filter { it.isNotBlank() }
+        .map(::translateReleaseChange)
         .distinct()
-        .take(3)
+        .take(5)
         .toList()
 
-    if (lines.isEmpty()) {
-        return "Améliorations et corrections incluses dans cette mise à jour."
+    return if (cleaned.isEmpty()) {
+        "Améliorations et corrections incluses dans cette mise à jour."
+    } else {
+        cleaned.joinToString(prefix = "• ", separator = "\n• ")
+    }
+}
+
+private fun translateReleaseChange(value: String): String {
+    val text = value.trim()
+    val match = Regex("Implement screen\\s+(\\d+)\\s*(?::|and)\\s*(.+)$", RegexOption.IGNORE_CASE).find(text)
+
+    if (match != null) {
+        return when (match.groupValues[1]) {
+            "14" -> "Écran 14 : création de groupe"
+            "15" -> "Écran 15 : discussion de groupe"
+            "16" -> "Écran 16 : profil utilisateur et navigation"
+            else -> "Écran \${match.groupValues[1]} : \${match.groupValues[2]}"
+        }
     }
 
-    return lines.joinToString(prefix = "• ", separator = "\n• ")
+    return when {
+        text.startsWith("Security:", ignoreCase = true) ->
+            "Sécurité : " + text.substringAfter(":").trim()
+        text.startsWith("Fix ", ignoreCase = true) ->
+            "Correction : " + text.removePrefix("Fix ").trim()
+        else -> text
+    }
 }
