@@ -34,5 +34,6 @@ sealed class UpdateDownloadState {
     }
     data class Validating(val updateInfo: AppUpdateInfo) : UpdateDownloadState()
     data class ReadyToInstall(val updateInfo: AppUpdateInfo, val apkFile: File) : UpdateDownloadState()
+    data class Installing(val updateInfo: AppUpdateInfo) : UpdateDownloadState()
     data class Error(val message: String, val canRetry: Boolean = true) : UpdateDownloadState()
 }
