@@ -20,6 +20,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -497,7 +498,7 @@ private fun translateReleaseChange(value: String): String {
             "14" -> "Écran 14 : création de groupe"
             "15" -> "Écran 15 : discussion de groupe"
             "16" -> "Écran 16 : profil utilisateur et navigation"
-            else -> "Écran \${match.groupValues[1]} : \${match.groupValues[2]}"
+            else -> "Écran " + match.groupValues[1] + " : " + match.groupValues[2]
         }
     }
 
