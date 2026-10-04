@@ -107,7 +107,8 @@ fun UpdateBottomSheet(
                 is UpdateDownloadState.ReadyToInstall -> {
                     ReadyToInstallContent(
                         onInstallClick = { onInstallClick(state.apkFile) },
-                        onRequestPermission = onRequestPermission
+                        onRequestPermission = onRequestPermission,
+                        onDismiss = onDismiss
                     )
                 }
                 is UpdateDownloadState.Error -> {
@@ -299,7 +300,8 @@ private fun ValidatingContent(updateInfo: AppUpdateInfo) {
 @Composable
 private fun ReadyToInstallContent(
     onInstallClick: () -> Unit,
-    onRequestPermission: () -> Unit
+    onRequestPermission: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
     val hasInstallPermission = ApkInstaller.canRequestPackageInstalls(context)
