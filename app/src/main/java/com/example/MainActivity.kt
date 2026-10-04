@@ -37,6 +37,7 @@ import com.example.ui.chat.AttachmentMenuScreen
 import com.example.ui.chat.LargeFileDownloadScreen
 import com.example.ui.chat.AttachmentAction
 import com.example.ui.chat.PrivateChatScreen
+import com.example.ui.groups.GroupChatScreen
 import com.example.ui.groups.GroupContact
 import com.example.ui.groups.NewGroupScreen
 import com.example.ui.discussions.DiscussionsScreen
@@ -79,6 +80,8 @@ class MainActivity : ComponentActivity() {
                 var selectedLargeFileName by rememberSaveable { mutableStateOf<String?>(null) }
                 var selectedLargeFileSizeBytes by rememberSaveable { mutableStateOf<Long?>(null) }
                 var selectedLargeFileMimeType by rememberSaveable { mutableStateOf<String?>(null) }
+                var selectedGroupName by rememberSaveable { mutableStateOf<String?>(null) }
+                var selectedGroupMemberCount by rememberSaveable { mutableStateOf(0) }
 
                 val defaultGroupContacts = remember {
                     listOf(
@@ -291,8 +294,25 @@ class MainActivity : ComponentActivity() {
                                     onBack = {
                                         currentRoute = HiraRoutes.DISCUSSIONS
                                     },
-                                    onCreateGroup = { _, _ ->
-                                        // L'écran 15 sera branché lorsque la discussion de groupe sera implémentée.
+                                    onCreateGroup = { groupName, selectedContactIds ->
+                                        selectedGroupName = groupName
+                                        selectedGroupMemberCount = selectedContactIds.size + 1
+                                        currentRoute = HiraRoutes.CHAT_GROUPE
+                                    }
+                                )
+                            }
+                            HiraRoutes.CHAT_GROUPE -> {
+                                GroupChatScreen(
+                                    groupName = selectedGroupName,
+                                    memberCount = selectedGroupMemberCount,
+                                    onBack = {
+                                        currentRoute = HiraRoutes.NOUVEAU_GROUPE
+                                    },
+                                    onAttachmentClick = {
+                                        currentRoute = HiraRoutes.PIECES_JOINTES
+                                    },
+                                    onSendMessage = {
+                                        // L'envoi réel sera branché au service de messagerie de groupe.
                                     }
                                 )
                             }
